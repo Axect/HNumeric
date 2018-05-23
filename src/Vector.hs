@@ -3,7 +3,9 @@ module Vector where
 import           Data.Functor                             ( )
 import           Control.Applicative                      ( )
 
+-- Vector Implementation
 newtype Vector a = Vector [a] deriving (Show, Eq)
+type Matrix a = Vector [a]
 
 instance Functor Vector where
     fmap f (Vector x) = Vector (map f x)
@@ -54,3 +56,7 @@ v .*. w = sum $ v * w
 -- Norm
 norm :: Floating a => Vector a -> a
 norm v = sqrt $ v .*. v
+
+-- Matrix Implementation
+
+-- determinant
