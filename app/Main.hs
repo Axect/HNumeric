@@ -1,9 +1,11 @@
 module Main where
 
-import Vector
-import Stats
+import           Vector
+import           Stats
 
 main :: IO ()
 main = do
-    print $ Vector [1,2,3]
-    print $ mean (Vector [1,2,3])
+    let a = Vector [1, 3, 4]
+    print a
+    print $ map ($ a) [mean, var, std]
+
