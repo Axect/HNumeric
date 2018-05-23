@@ -27,6 +27,30 @@ instance Foldable Vector where
     foldl _ z (Vector []) = z
     foldl f z (Vector xs) = foldl f z xs
 
+-- Addition
+(.+) :: Num a => Vector a -> a -> Vector a
+v .+ n = (+ n) <$> v 
+
+-- Subtraction
+(.-) :: Num a => Vector a -> a -> Vector a
+v .- n = (+ (-n)) <$> v
+
+-- Multiplication
+(.*) :: Num a => Vector a -> a -> Vector a
+v .* n = (* n) <$> v
+
+-- Divide
+(./) :: Fractional a => Vector a -> a -> Vector a
+v ./ n = (/ n) <$> v
+
+-- Power (matlab syntax)
+(.^) :: Floating a => Vector a -> a -> Vector a
+v .^ n = (** n) <$> v 
+
 -- Dot product
 (.*.) :: Num a => Vector a -> Vector a -> a
 v .*. w = sum $ v * w
+
+-- Norm
+norm :: Floating a => Vector a -> a
+norm v = sqrt $ v .*. v
