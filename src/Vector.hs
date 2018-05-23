@@ -1,7 +1,7 @@
 module Vector where
 
 import           Data.Functor                             ( )
-import           Control.Applicative
+import           Control.Applicative                      ( )
 
 newtype Vector a = Vector [a] deriving (Show, Eq)
 
@@ -27,5 +27,6 @@ instance Foldable Vector where
     foldl _ z (Vector []) = z
     foldl f z (Vector xs) = foldl f z xs
 
+-- Dot product
 (.*.) :: Num a => Vector a -> Vector a -> a
-v .*. w = sum $ liftA2 (*) v w
+v .*. w = sum $ v * w
