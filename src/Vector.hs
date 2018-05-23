@@ -26,6 +26,3 @@ instance Foldable Vector where
 
     foldl _ z (Vector []) = z
     foldl f z (Vector xs) = foldl f z xs
-
-mean :: Fractional a => Vector a -> a
-mean v = sum v / fromIntegral (length v)

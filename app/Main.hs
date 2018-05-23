@@ -1,6 +1,9 @@
 module Main where
 
-import Lib
+import Vector
+import Stats
 
 main :: IO ()
-main = someFunc
+main = do
+    print $ Vector [1,2,3]
+    print $ mean (Vector [1,2,3])
