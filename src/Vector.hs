@@ -13,12 +13,12 @@ instance Applicative Vector where
     Vector fs <*> Vector xs = Vector (zipWith ($) fs xs)
 
 instance (Num a) => Num (Vector a) where
-    negate v = negate <$> v
-    (+) v1 v2 = (+) <$> v1 <*> v2
-    (*) v1 v2 = (*) <$> v1 <*> v2
-    fromInteger n = fromInteger <$> Vector (replicate (fromIntegral n) 0)
-    signum v = signum <$> v
-    abs v = abs <$> v
+    negate v       = negate <$> v
+    (+) v1 v2      = (+) <$> v1 <*> v2
+    (*) v1 v2      = (*) <$> v1 <*> v2
+    fromInteger n  = fromInteger <$> Vector (replicate (fromIntegral n) 0)
+    signum v       = signum <$> v
+    abs v          = abs <$> v
 
 instance Foldable Vector where
     foldr _ z (Vector []) = z
