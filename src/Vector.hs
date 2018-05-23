@@ -1,7 +1,7 @@
 module Vector where
 
-import Data.Functor ()
-import Control.Applicative ()
+import           Data.Functor                             ( )
+import           Control.Applicative
 
 newtype Vector a = Vector [a] deriving (Show, Eq)
 
@@ -9,7 +9,7 @@ instance Functor Vector where
     fmap f (Vector x) = Vector (map f x)
 
 instance Applicative Vector where
-    pure a = Vector [] 
+    pure a = Vector []
     Vector fs <*> Vector xs = Vector (zipWith ($) fs xs)
 
 instance (Num a) => Num (Vector a) where
@@ -17,7 +17,7 @@ instance (Num a) => Num (Vector a) where
     (+) v1 v2 = (+) <$> v1 <*> v2
     (*) v1 v2 = (*) <$> v1 <*> v2
     fromInteger n = fromInteger <$> Vector (replicate (fromIntegral n) 0)
-    signum v = signum <$> v 
+    signum v = signum <$> v
     abs v = abs <$> v
 
 instance Foldable Vector where
@@ -26,3 +26,6 @@ instance Foldable Vector where
 
     foldl _ z (Vector []) = z
     foldl f z (Vector xs) = foldl f z xs
+
+(.*.) :: Num a => Vector a -> Vector a -> a
+v .*. w = sum $ liftA2 (*) v w
