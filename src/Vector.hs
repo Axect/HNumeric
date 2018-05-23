@@ -29,7 +29,7 @@ instance Foldable Vector where
 
 -- Addition
 (.+) :: Num a => Vector a -> a -> Vector a
-v .+ n = (+ n) <$> v 
+v .+ n = (+ n) <$> v
 
 -- Subtraction
 (.-) :: Num a => Vector a -> a -> Vector a
@@ -45,7 +45,7 @@ v ./ n = (/ n) <$> v
 
 -- Power (matlab syntax)
 (.^) :: Floating a => Vector a -> a -> Vector a
-v .^ n = (** n) <$> v 
+v .^ n = (** n) <$> v
 
 -- Dot product
 (.*.) :: Num a => Vector a -> Vector a -> a
