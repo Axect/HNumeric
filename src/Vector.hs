@@ -6,26 +6,26 @@ import Data.Traversable
 
 -- Vector Implementation
 newtype Vector a = Vector [a] deriving (Show, Eq)
-type Matrix a = Vector [a]
+type Matrix a    = Vector [a]
 
 instance Functor Vector where
   fmap f (Vector x) = Vector (map f x)
 
 instance Applicative Vector where
-  pure a = Vector []
+  pure a                  = Vector []
   Vector fs <*> Vector xs = Vector (zipWith ($) fs xs)
 
 instance (Num a) => Num (Vector a) where
-  negate v       = negate <$> v
-  (+) v1 v2      = (+) <$> v1 <*> v2
-  (*) v1 v2      = (*) <$> v1 <*> v2
-  fromInteger n  = fromInteger <$> Vector [n]
-  signum v       = signum <$> v
-  abs v          = abs <$> v
+  negate v      = negate <$> v
+  (+) v1 v2     = (+) <$> v1 <*> v2
+  (*) v1 v2     = (*) <$> v1 <*> v2
+  fromInteger n = fromInteger <$> Vector [n]
+  signum v      = signum <$> v
+  abs v         = abs <$> v
 
 instance (Fractional a) => Fractional (Vector a) where
-  recip v = recip <$> v
-  (/) v1 v2 = (*) <$> v1 <*> recip v2
+  recip v        = recip <$> v
+  (/) v1 v2      = (*) <$> v1 <*> recip v2
   fromRational n = fromRational <$> Vector [n]
 
 instance Foldable Vector where
@@ -80,8 +80,8 @@ det = detMat . toList
 -- dropAt : drop nth array
 dropAt :: Int -> [[a]] -> [[a]]
 dropAt n mat | n /= (length mat - 1) = ys ++ tail zs
-             | otherwise = take n mat
-             where (ys, zs) = splitAt n mat
+             | otherwise             = take n mat
+             where (ys, zs)          = splitAt n mat
 
 -- minorMat
 minorMat :: Int -> [[a]] -> [[a]]
@@ -91,7 +91,7 @@ minorMat i m = map tail (dropAt i m)
 pwDet :: Num a => Int -> [[a]] -> a
 pwDet _ [[a]]   = a
 pwDet n mat     = (-1) ^ n * head (mat !! n) * sum [pwDet m mat2 | m <- [0 .. (length mat2 - 1)]]
-  where mat2 = minorMat n mat
+  where mat2    = minorMat n mat
 
 -- det for [[a]]
 detMat :: Num a => [[a]] -> a
