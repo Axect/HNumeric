@@ -73,6 +73,11 @@ executable test-exe
 
 ## Usage
 
+### Import Module
+
+* Vector
+* Stats
+
 ### Basic Vector Use
 
 ```haskell
