@@ -2,7 +2,6 @@ module Vector where
 
 import Data.Functor                             ( )
 import Control.Applicative                      ( )
-import Data.Traversable
 
 -- Vector Implementation
 newtype Vector a = Vector [a] deriving (Show, Eq)
@@ -72,6 +71,10 @@ norm :: Floating a => Vector a -> a
 norm v = sqrt $ v .*. v
 
 -- Matrix Implementation
+-- indexMat
+index :: Matrix a -> [[(Int, Int)]]
+index = indexMat . toList
+
 -- determinant
 det :: Num a => Matrix a -> a
 det m | isSquare m = (detMat . toList) m
@@ -80,16 +83,39 @@ det m | isSquare m = (detMat . toList) m
 isSquare :: Matrix a -> Bool
 isSquare m = all (==length m) (length <$> m)
 
+--inv :: Num a => Matrix a -> a
+--inv m | length m == 1 = (head . head . toList) m
+--  | otherwise =  
+
+
+
+
 -- Useful Function
--- dropAt : drop nth array
-dropAt :: Int -> [[a]] -> [[a]]
-dropAt n mat | n /= (length mat - 1) = ys ++ tail zs
-             | otherwise             = take n mat
-             where (ys, zs)          = splitAt n mat
+-- indexMat
+indexMat :: [[a]] -> [[(Int, Int)]]
+indexMat m@(xs:xss) = do
+  i <- [0..(length m - 1)]
+  [zip (replicate (length xs) i) [0..(length xs - 1)]]
+
+-- dropAt
+dropAt :: Int -> Int -> [[a]] -> [[a]]
+dropAt i j mat = map (splitAt' i) $ splitAt' j mat
+
+-- postSplitAt
+postSplitAt (x,y) = x ++ tail y
+
+-- splitAt'
+splitAt' :: Int -> [a] -> [a]
+splitAt' i = postSplitAt . splitAt i
+
+-- dropArray : drop nth array
+dropArray :: Int -> [[a]] -> [[a]]
+dropArray n mat | n /= (length mat - 1) = splitAt' n mat
+                | otherwise             = take n mat
 
 -- minorMat
 minorMat :: Int -> [[a]] -> [[a]]
-minorMat i m = map tail (dropAt i m)
+minorMat i m = map tail (dropArray i m)
 
 -- picewise Determinant
 pwDet :: Num a => Int -> [[a]] -> a
@@ -100,3 +126,7 @@ pwDet n mat     = (-1) ^ n * head (mat !! n) * sum [pwDet m mat2 | m <- [0 .. (l
 -- det for [[a]]
 detMat :: Num a => [[a]] -> a
 detMat mat = sum [ pwDet n mat | n <- [0 .. (length mat - 1)]]
+
+-- cofactor
+cofactorMat :: Num a => Int -> Int -> [[a]] -> [[a]]
+cofactorMat i j mat = map (map (* (-1)^(i+j))) (dropAt i j mat)
