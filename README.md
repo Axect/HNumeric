@@ -85,6 +85,9 @@ print a
 -- You can (+1) by fmap (Vector is functor)
 (+1) <$> a 
 
+-- Or MATLAB-like operator (.+, .-, .*, ./, .^)
+a .+ 1
+
 -- You can make list from vector
 toList a -- [1, 2, 3]
 
@@ -93,6 +96,9 @@ fromList [1,2,3] -- Vector [1,2,3]
 
 -- You can add (subtract, multiply, divide) vectors
 a + b -- Vector [5,7,9]
+
+-- Also dot product is here.
+a .*. b -- 1*4 + 2*5 + 3*6 = 32
 
 -- Declare Matrix
 let c = Vector [[1,2],[3,4]]
