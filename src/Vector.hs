@@ -19,9 +19,14 @@ instance (Num a) => Num (Vector a) where
   negate v       = negate <$> v
   (+) v1 v2      = (+) <$> v1 <*> v2
   (*) v1 v2      = (*) <$> v1 <*> v2
-  fromInteger n  = fromInteger <$> Vector (replicate (fromIntegral n) 0)
+  fromInteger n  = fromInteger <$> Vector [n]
   signum v       = signum <$> v
   abs v          = abs <$> v
+
+instance (Fractional a) => Fractional (Vector a) where
+  recip v = recip <$> v
+  (/) v1 v2 = (*) <$> v1 <*> recip v2
+  fromRational n = fromRational <$> Vector [n]
 
 instance Foldable Vector where
   foldr _ z (Vector []) = z
