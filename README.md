@@ -28,5 +28,9 @@ fromList [1,2,3] -- Vector [1,2,3]
 -- You can add (subtract, multiply, divide) vectors
 a + b -- Vector [5,7,9]
 
+-- Declare Matrix
+let c = Vector [[1,2],[3,4]]
 
+-- Determinant
+det c
 ```
