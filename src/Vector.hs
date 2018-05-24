@@ -74,7 +74,11 @@ norm v = sqrt $ v .*. v
 -- Matrix Implementation
 -- determinant
 det :: Num a => Matrix a -> a
-det = detMat . toList
+det m | isSquare m = (detMat . toList) m
+      | otherwise  = error "It's not Square matrix"
+
+isSquare :: Matrix a -> Bool
+isSquare m = all (==length m) (length <$> m)
 
 -- Useful Function
 -- dropAt : drop nth array
