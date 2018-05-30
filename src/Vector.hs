@@ -71,6 +71,10 @@ norm :: Floating a => Vector a -> a
 norm v = sqrt $ v .*. v
 
 -- Matrix Implementation
+-- Transpose
+transpose :: Matrix a -> Matrix a
+transpose = fromList . transposeMat . toList
+
 -- indexMat
 index :: Matrix a -> [[(Int, Int)]]
 index = indexMat . toList
@@ -91,6 +95,10 @@ isSquare m = all (==length m) (length <$> m)
 
 
 -- Useful Function
+-- Transpose
+transposeMat :: Matrix -> Matrix
+transposeMat m = map (\l -> map (!! l) m) [0 .. (length m - 1)]
+
 -- indexMat
 indexMat :: [[a]] -> [[(Int, Int)]]
 indexMat m@(xs:xss) = do
