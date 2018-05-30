@@ -89,16 +89,13 @@ isSquare :: Matrix a -> Bool
 isSquare m = all (== length m) (length <$> m)
 
 -- isInvertible
-isInvertible :: Matrix a -> Bool
+isInvertible :: (Eq a, Num a) => Matrix a -> Bool
 isInvertible m = det m /= 0
 
 -- Inverse
-inv :: Fractional a => Matrix a -> Matrix a
+inv :: (Eq a, Fractional a) => Matrix a -> Matrix a
 inv m | isInvertible m = (fromList . invMat . toList) m
       | otherwise      = error "Matrix is not invertible!"
-
-
-
 
 -- Useful Function
 -- Transpose
