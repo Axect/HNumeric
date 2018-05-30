@@ -1,7 +1,7 @@
 module Vector where
 
-import Data.Functor                             ( )
-import Control.Applicative                      ( )
+import           Data.Functor                   ( )
+import           Control.Applicative            ( )
 
 -- Vector Implementation
 newtype Vector a = Vector [a] deriving (Show, Eq)
@@ -84,12 +84,18 @@ det :: Num a => Matrix a -> a
 det m | isSquare m = (detMat . toList) m
       | otherwise  = error "It's not Square matrix"
 
+-- isSquare
 isSquare :: Matrix a -> Bool
-isSquare m = all (==length m) (length <$> m)
+isSquare m = all (== length m) (length <$> m)
 
---inv :: Num a => Matrix a -> a
---inv m | length m == 1 = (head . head . toList) m
---  | otherwise =  
+-- isInvertible
+isInvertible :: Matrix a -> Bool
+isInvertible m = det m /= 0
+
+-- Inverse
+inv :: Fractional a => Matrix a -> Matrix a
+inv m | isInvertible m = (fromList . invMat . toList) m
+      | otherwise      = error "Matrix is not invertible!"
 
 
 
@@ -101,40 +107,59 @@ transposeMat m = map (\l -> map (!! l) m) [0 .. (length m - 1)]
 
 -- indexMat
 indexMat :: [[a]] -> [[(Int, Int)]]
-indexMat m@(xs:xss) = do
-  i <- [0..(length m - 1)]
-  [zip (replicate (length xs) i) [0..(length xs - 1)]]
+indexMat m@(xs : xss) = do
+  i <- [0 .. (length m - 1)]
+  [zip (replicate (length xs) i) [0 .. (length xs - 1)]]
 
--- dropAt
-dropAt :: Int -> Int -> [[a]] -> [[a]]
-dropAt i j mat = map (splitAt' i) $ splitAt' j mat
+-- dropAtMat
+dropAtMat :: Int -> Int -> [[a]] -> [[a]]
+dropAtMat i j mat = map (dropAt j) $ dropAt i mat
 
 -- postSplitAt
-postSplitAt (x,y) = x ++ tail y
+postSplitAt (x, y) = x ++ tail y
 
--- splitAt'
-splitAt' :: Int -> [a] -> [a]
-splitAt' i = postSplitAt . splitAt i
+-- dropAt
+dropAt :: Int -> [a] -> [a]
+dropAt i = postSplitAt . splitAt i
 
--- dropArray : drop nth array
-dropArray :: Int -> [[a]] -> [[a]]
-dropArray n mat | n /= (length mat - 1) = splitAt' n mat
-                | otherwise             = take n mat
+-- dropAtMat' : drop nth array
+dropAtMat' :: Int -> [[a]] -> [[a]]
+dropAtMat' n mat | n /= (length mat - 1) = dropAt n mat
+                 | otherwise             = take n mat
 
 -- minorMat
 minorMat :: Int -> [[a]] -> [[a]]
-minorMat i m = map tail (dropArray i m)
+minorMat i m = map tail (dropAtMat' i m)
 
 -- picewise Determinant
 pwDet :: Num a => Int -> [[a]] -> a
-pwDet _ [[a]]   = a
-pwDet n mat     = (-1) ^ n * head (mat !! n) * sum [pwDet m mat2 | m <- [0 .. (length mat2 - 1)]]
-  where mat2    = minorMat n mat
+pwDet _ [[a]] = a
+pwDet n mat   = (-1) ^ n * head (mat !! n) * sum
+  [ pwDet m mat2 | m <- [0 .. (length mat2 - 1)] ]
+  where mat2 = minorMat n mat
 
 -- det for [[a]]
 detMat :: Num a => [[a]] -> a
-detMat mat = sum [ pwDet n mat | n <- [0 .. (length mat - 1)]]
+detMat mat = sum [ pwDet n mat | n <- [0 .. (length mat - 1)] ]
 
 -- cofactor
-cofactorMat :: Num a => Int -> Int -> [[a]] -> [[a]]
-cofactorMat i j mat = map (map (* (-1)^(i+j))) (dropAt i j mat)
+cofactorMat :: Num a => Int -> Int -> [[a]] -> a
+cofactorMat i j = (* (-1) ^ (i + j)) . detMat . (dropAtMat i j)
+
+--inverse
+invMat :: Fractional a => [[a]] -> [[a]]
+invMat = toMat . invFlat
+
+invFlat :: Fractional a => [[a]] -> [a]
+invFlat m = do
+  let d   = abs (detMat m)
+  let idx = (transposeMat . indexMat) m
+  (i, j) <- concat idx
+  [cofactorMat i j m / d]
+
+-- Vector to Mat
+toMat :: [a] -> [[a]]
+toMat m = do
+  i <- [0 .. (l - 1)]
+  [take l (drop (l * i) m)]
+  where l = (floor . sqrt) (fromIntegral (length m))
