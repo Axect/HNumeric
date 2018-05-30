@@ -96,7 +96,7 @@ isSquare m = all (==length m) (length <$> m)
 
 -- Useful Function
 -- Transpose
-transposeMat :: Matrix -> Matrix
+transposeMat :: [[a]] -> [[a]]
 transposeMat m = map (\l -> map (!! l) m) [0 .. (length m - 1)]
 
 -- indexMat
