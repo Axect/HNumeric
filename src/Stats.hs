@@ -2,6 +2,8 @@ module Stats where
 
 import           Vector
 
+type Coeff a = (a, a)
+
 mean :: Fractional a => Vector a -> a
 mean v = sum v / fromIntegral (length v)
 
@@ -20,11 +22,16 @@ std = sqrt . var
 cov :: Floating a => Vector a -> Vector a -> Matrix a
 cov x y = Vector [[var x, cov' x y], [cov' y x, var y]]
 
--- Least Square Method
-lm :: Floating a => Vector a -> Vector a -> (a, a)
+-- Least Square Method - (Intercept, Slope)
+lm :: Floating a => Vector a -> Vector a -> Coeff a
 lm x y = ((my - b1 * mx), b1)
  where
   mx = mean x
   my = mean y
   b1 = (x .- mx) .*. (y .- my) / ((x .- mx) .*. (x .- mx))
 
+lineFit :: Floating a => Coeff a -> Vector a -> Vector a
+lineFit (n, m) x = x .* m .+ n
+
+rss :: Floating a => Vector a -> Vector a -> a
+rss x y = sum (y - lineFit (lm x y) x)
