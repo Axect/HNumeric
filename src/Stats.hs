@@ -34,4 +34,6 @@ lineFit :: Floating a => Coeff a -> Vector a -> Vector a
 lineFit (n, m) x = x .* m .+ n
 
 rss :: Floating a => Vector a -> Vector a -> a
-rss x y = sum (y - lineFit (lm x y) x)
+rss x y = sum ((y - lineFit (lm x y) x) .^ 2)
+
+rse x y = sqrt (1 / fromIntegral (length x - 2) * rss x y)
