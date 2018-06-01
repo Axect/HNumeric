@@ -105,9 +105,69 @@ a + b -- Vector [5,7,9]
 -- Also dot product is here.
 a .*. b -- 1*4 + 2*5 + 3*6 = 32
 
+-- Horizontal concatenate
+a .++. b -- Vector [1,2,3,4,5,6]
+-- or
+hcat a b
+
+-- Vertical Concatenate
+a .**. b -- Vector [[1,2,3],[4,5,6]] -- Matrix Integer
+-- or
+vcat a b
+
 -- Declare Matrix
 let c = Vector [[1,2],[3,4]]
 
 -- Determinant
 det c
+
+-- Inverse
+inv c
+
+-- Matrix ops with Constant (+, -, *, /, ^)
+c %+ 1 -- Vector [[2,3],[4,5]]
+
+-- Matrix ops with Matrix (+, -)
+c %+% c -- Vector [[2,4],[6,8]]
+
+-- Vector concat with Matrix
+Vector [0,1] .: c -- Vector [[0,1],[1,2],[3,4]]
+
+-- Matrix concat with Matrix
+c %++% c -- Vector [[1,2],[3,4],[1,2],[3,4]]
+```
+
+### Basic Stats Usage
+
+```haskell
+-- Sample Vector (import Vector)
+v = Vector [1..10]
+w = Vector [10, 9 .. 1]
+
+-- Mean
+mean v
+
+-- Var
+var v
+
+-- Std
+std v
+
+-- Cov Matrix
+cov v w
+
+-- Only Cov
+cov' v w
+
+-- Linear Fit
+(intercept, slope) = lm v w -- (11.0, -1.0) -- (Intercept, Slope)
+
+-- Linear Fit function
+lineFit (intercept, slope) (Vector [1 .. 20])
+
+-- RSS
+rss v w
+
+-- RSE
+rse v w
 ```
