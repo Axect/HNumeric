@@ -67,21 +67,39 @@ v .^ n = (** n) <$> v
 (.*.) :: Num a => Vector a -> Vector a -> a
 v .*. w = sum $ v * w
 
+-- Addition Matrix with Constant
+(%+) :: Num a => Matrix a -> a -> Matrix a
+m %+ a = map (+ a) <$> m
+
+-- Subtraction Matrix with Constant
+(%-) :: Num a => Matrix a -> a -> Matrix a
+m %- a = map (+ (-a)) <$> m
+
+-- Multiplication Matrix with Constant
+(%*) :: Num a => Matrix a -> a -> Matrix a
+m %* a = map (* a) <$> m
+
+-- Divide Matrix with Constant
+(%/) :: Fractional a => Matrix a -> a -> Matrix a
+m %/ a = map (/ a) <$> m
+
 -- Addition Matrix
-(/+) :: Num a => Matrix a -> a -> Matrix a
-m /+ n = map (+ n) <$> m
+(%+%) :: Num a => Matrix a -> Matrix a -> Matrix a
+m %+% n = zipWith (+) <$> m <*> n
 
 -- Subtraction Matrix
-(/-) :: Num a => Matrix a -> a -> Matrix a
-m /- n = map (+ (-n)) <$> m
+(%-%) :: Num a => Matrix a -> Matrix a -> Matrix a
+m %-% n = zipWith (-) <$> m <*> n
 
 -- Multiplication Matrix
-(/*) :: Num a => Matrix a -> a -> Matrix a
-m /* n = map (* n) <$> m
+-- TODO: Matrix Multiplication
+--(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
+--m %*% n = zipWith (*) <$> m <*> n
 
 -- Divide Matrix
-(//) :: Fractional a => Matrix a -> a -> Matrix a
-m // n = map (/ n) <$> m
+-- TODO: Multiplicate Inverse Matrix
+--(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
+--m %/% n = zipWith (/) <$> m <*> n
 
 -- Concatenate
 -- Vector with Vector
@@ -103,8 +121,8 @@ vcat v w = v .**. w
 v .: m = fromList (toList v : toList m)
 
 -- Matrix with Matrix
-(/++/) :: Matrix a -> Matrix a -> Matrix a
-m /++/ n = fromList (toList m ++ toList n)
+(%++%) :: Matrix a -> Matrix a -> Matrix a
+m %++% n = fromList (toList m ++ toList n)
 
 -- Norm
 norm :: Floating a => Vector a -> a

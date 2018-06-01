@@ -31,4 +31,5 @@ fromCSV r = DataFrame {header = Vector h1, numeric = Vector v1}
 -- DataFrame to 
 --writeCSV :: DataFrame -> FilePath -> IO ()
 --writeCSV df f = 
---  where q1 = 
+--  where ns = map show <$> (numeric df)
+
