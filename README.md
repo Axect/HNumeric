@@ -1,5 +1,7 @@
 # HNumeric
 
+![Travis](https://travis-ci.org/Axect/HNumeric.svg?branch=master)
+
 ## Packages
 
 * Vector : Contain vector, matrix, linear algebra
