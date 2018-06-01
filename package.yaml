@@ -20,7 +20,8 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/Axect/HNumeric#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+- base
+- normaldistribution
 
 library:
   source-dirs: src

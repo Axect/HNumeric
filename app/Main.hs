@@ -3,6 +3,7 @@ module Main where
 import           Vector
 import           Stats
 import           CSV
+import           Data.Random.Normal
 
 main :: IO ()
 main = do
