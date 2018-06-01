@@ -42,6 +42,7 @@ toList (Vector xs) = xs
 fromList :: [a] -> Vector a
 fromList = Vector
 
+-- Operation
 -- Addition
 (.+) :: Num a => Vector a -> a -> Vector a
 v .+ n = (+ n) <$> v
@@ -65,6 +66,45 @@ v .^ n = (** n) <$> v
 -- Dot product
 (.*.) :: Num a => Vector a -> Vector a -> a
 v .*. w = sum $ v * w
+
+-- Addition Matrix
+(/+) :: Num a => Matrix a -> a -> Matrix a
+m /+ n = map (+ n) <$> m
+
+-- Subtraction Matrix
+(/-) :: Num a => Matrix a -> a -> Matrix a
+m /- n = map (+ (-n)) <$> m
+
+-- Multiplication Matrix
+(/*) :: Num a => Matrix a -> a -> Matrix a
+m /* n = map (* n) <$> m
+
+-- Divide Matrix
+(//) :: Fractional a => Matrix a -> a -> Matrix a
+m // n = map (/ n) <$> m
+
+-- Concatenate
+-- Vector with Vector
+(.++.) :: Vector a -> Vector a -> Vector a
+v .++. w = fromList (toList v ++ toList w)
+
+hcat :: Vector a -> Vector a -> Vector a
+hcat v w = v .++. w
+
+-- Vector with Vector to Matrix
+(.**.) :: Vector a -> Vector a -> Matrix a
+v .**. w = fromList (toList v : [toList w])
+
+vcat :: Vector a -> Vector a -> Matrix a
+vcat v w = v .**. w
+
+-- Vector with Matrix
+(.:) :: Vector a -> Matrix a -> Matrix a
+v .: m = fromList (toList v : toList m)
+
+-- Matrix with Matrix
+(/++/) :: Matrix a -> Matrix a -> Matrix a
+m /++/ n = fromList (toList m ++ toList n)
 
 -- Norm
 norm :: Floating a => Vector a -> a
@@ -141,7 +181,7 @@ detMat mat = sum [ pwDet n mat | n <- [0 .. (length mat - 1)] ]
 
 -- cofactor
 cofactorMat :: Num a => Int -> Int -> [[a]] -> a
-cofactorMat i j = (* (-1) ^ (i + j)) . detMat . (dropAtMat i j)
+cofactorMat i j = (* (-1) ^ (i + j)) . detMat . dropAtMat i j
 
 --inverse
 invMat :: Fractional a => [[a]] -> [[a]]
