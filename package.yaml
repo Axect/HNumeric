@@ -11,8 +11,8 @@ extra-source-files:
 - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
+synopsis:            Haskell Numeric Library with pure functionality & MATLAB Syntax.
+category:            Numeric, Linear Algebra, Statistics, Machine Learning
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
@@ -20,7 +20,7 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/Axect/HNumeric#readme>
 
 dependencies:
-- base
+- base >= 4.7 && < 5
 - normaldistribution
 
 library:
