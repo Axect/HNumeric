@@ -12,9 +12,9 @@ import           Data.Functor                   ( )
 import           Control.Applicative            ( )
 
 -- Vector Implementation
-newtype Vector a = Vector [a] deriving (Show, Eq) -- ^ Vector is wrapper for List
+newtype Vector a = Vector [a] deriving (Show, Eq)
 
-type Matrix a    = Vector [a]                     -- ^ Matrix is wrapper for Vector List
+type Matrix a    = Vector [a]
 
 instance Functor Vector where
   fmap f (Vector x) = Vector (map f x)
