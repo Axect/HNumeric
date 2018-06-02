@@ -104,20 +104,35 @@ m %/ a = map (/ a) <$> m
 
 -- |(%+%) is addition between two matrix.
 (%+%) :: Num a => Matrix a -> Matrix a -> Matrix a
-m %+% n = zipWith (+) <$> m <*> n
+Vector [] %+% m         = m
+m         %+% Vector [] = m
+m         %+% n         = zipWith (+) <$> m <*> n
 
 -- Subtraction Matrix
 (%-%) :: Num a => Matrix a -> Matrix a -> Matrix a
 m %-% n = zipWith (-) <$> m <*> n
 
--- TODO: Matrix Multiplication
---(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
---m %*% n = 
+-- |Matrix Multiplication using Devide and Conquer Algorithm.
+(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
+_            %*% Vector []    = Vector []
+Vector []    %*% _            = Vector []
+_            %*% Vector [[]]  = Vector [[]]
+Vector [[] ] %*% _            = Vector [[]]
+Vector [[x]] %*% Vector [[y]] = Vector [[x * y]]
+m            %*% n            = (a11 %++% a12) %**% (a21 %++% a22)
+ where
+  (m11, n11) = (bp 1 m, bp 1 n)
+  (m12, n12) = (bp 2 m, bp 2 n)
+  (m21, n21) = (bp 3 m, bp 3 n)
+  (m22, n22) = (bp 4 m, bp 4 n)
+  a11        = (m11 %*% n11) %+% (m12 %*% n21)
+  a12        = (m11 %*% n12) %+% (m12 %*% n22)
+  a21        = (m21 %*% n11) %+% (m22 %*% n21)
+  a22        = (m21 %*% n12) %+% (m22 %*% n22)
 
---blockPartition :: Matrix a -> (Matrix a, Matrix a, Matrix a, Matrix a)
---blockPartition m | even m = 
---  where l = length m
---        sl = floor $ sqrt (fromIntegral l)
+-- |Block Partitioning
+bp :: Int -> Matrix a -> Matrix a
+bp n m = fromList $ bpMat n (toList m)
 
 -- TODO: Multiplicate Inverse Matrix
 --(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
@@ -144,9 +159,13 @@ vcat v w = v .**. w
 (.:) :: Vector a -> Matrix a -> Matrix a
 v .: m = fromList (toList v : toList m)
 
--- |(%++%) horizontally concatenate matrices.
+-- |(%++%) Horizontally concatenate matrices.
 (%++%) :: Matrix a -> Matrix a -> Matrix a
-m %++% n = fromList (toList m ++ toList n)
+m %++% n = fromList $ zipWith (++) (toList m) (toList n)
+
+-- |(%**%) Vertically concatenate matrices.
+(%**%) :: Matrix a -> Matrix a -> Matrix a
+m %**% n = fromList (toList m ++ toList n)
 
 -- |Norm is norm of vector.
 norm :: Floating a => Vector a -> a
@@ -243,3 +262,15 @@ toMat m = do
   i <- [0 .. (l - 1)]
   [take l (drop (l * i) m)]
   where l = (floor . sqrt) (fromIntegral (length m))
+
+-- Block Partitioning
+bpMat :: Int -> [[a]] -> [[a]]
+bpMat _ [] = []
+bpMat n m | n == 1    = (map (take sl) . take sl) m
+          | n == 2    = (map (drop sl) . take sl) m
+          | n == 3    = (map (take sl) . drop sl) m
+          | n == 4    = (map (drop sl) . drop sl) m
+          | otherwise = error "Please input 1 ~ 4"
+ where
+  l  = length m
+  sl = (floor . sqrt . fromIntegral) l
