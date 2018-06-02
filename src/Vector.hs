@@ -1,11 +1,20 @@
+{-|
+Module      : Vector
+Description : Haskell Vector & Matrix & Linear Algebra Library to do machine learning
+CopyRight   : (c) Tae Geun Kim, 2018
+License     : GPL-3
+Maintainer  : edeftg@gmail.com
+Stability   : Experimental
+-}
 module Vector where
 
 import           Data.Functor                   ( )
 import           Control.Applicative            ( )
 
 -- Vector Implementation
-newtype Vector a = Vector [a] deriving (Show, Eq)
-type Matrix a    = Vector [a]
+newtype Vector a = Vector [a] deriving (Show, Eq) -- ^ Vector is wrapper for List
+
+type Matrix a    = Vector [a]                     -- ^ Matrix is wrapper for Vector List
 
 instance Functor Vector where
   fmap f (Vector x) = Vector (map f x)
@@ -34,16 +43,21 @@ instance Foldable Vector where
   foldl _ z (Vector []) = z
   foldl f z (Vector xs) = foldl f z xs
 
--- toList
+-- |toList makes List from Vector
 toList :: Vector a -> [a]
 toList (Vector xs) = xs
 
--- fromList
+-- |fromList is equivalent to Vector constructor
 fromList :: [a] -> Vector a
 fromList = Vector
 
 -- Operation
--- Addition
+{-|
+   (.+) is addition Vector with Constant.
+   Dot means position of Vector.
+   Example: a .* 2  = twice whole elements of a
+            a .*. b = Dot product
+-}
 (.+) :: Num a => Vector a -> a -> Vector a
 v .+ n = (+ n) <$> v
 
@@ -59,15 +73,20 @@ v .* n = (* n) <$> v
 (./) :: Fractional a => Vector a -> a -> Vector a
 v ./ n = (/ n) <$> v
 
--- Power (matlab syntax)
+-- |(.^) is power function. Don't confuse with bitwise function.
 (.^) :: Floating a => Vector a -> a -> Vector a
 v .^ n = (** n) <$> v
 
--- Dot product
+-- |(.*.) is dot product of two vectors.
 (.*.) :: Num a => Vector a -> Vector a -> a
 v .*. w = sum $ v * w
 
--- Addition Matrix with Constant
+{-|
+   (%+) is addition Matrix with Constant.
+   % means position of Matrix.
+   Example: a %* 2  = twice whole elements of a.
+            a %*% b = Matrix multiplication.
+-}
 (%+) :: Num a => Matrix a -> a -> Matrix a
 m %+ a = map (+ a) <$> m
 
@@ -83,7 +102,7 @@ m %* a = map (* a) <$> m
 (%/) :: Fractional a => Matrix a -> a -> Matrix a
 m %/ a = map (/ a) <$> m
 
--- Addition Matrix
+-- |(%+%) is addition between two matrix.
 (%+%) :: Num a => Matrix a -> Matrix a -> Matrix a
 m %+% n = zipWith (+) <$> m <*> n
 
@@ -102,55 +121,58 @@ m %-% n = zipWith (-) <$> m <*> n
 --m %/% n = zipWith (/) <$> m <*> n
 
 -- Concatenate
--- Vector with Vector
+-- |(.++.) horizontally concatenate vectors.
 (.++.) :: Vector a -> Vector a -> Vector a
 v .++. w = fromList (toList v ++ toList w)
 
+-- |hcat is same as (.++.). It is just julia syntax.
 hcat :: Vector a -> Vector a -> Vector a
 hcat v w = v .++. w
 
--- Vector with Vector to Matrix
+-- |(.**.) vertically stack vectors.
 (.**.) :: Vector a -> Vector a -> Matrix a
 v .**. w = fromList (toList v : [toList w])
 
+-- |vcat is same as (.**.)
 vcat :: Vector a -> Vector a -> Matrix a
 vcat v w = v .**. w
 
--- Vector with Matrix
+-- |(.:) inserts vector to head of matrix.
 (.:) :: Vector a -> Matrix a -> Matrix a
 v .: m = fromList (toList v : toList m)
 
--- Matrix with Matrix
+-- |(%++%) horizontally concatenate matrices.
 (%++%) :: Matrix a -> Matrix a -> Matrix a
 m %++% n = fromList (toList m ++ toList n)
 
--- Norm
+-- |Norm is norm of vector.
 norm :: Floating a => Vector a -> a
 norm v = sqrt $ v .*. v
 
 -- Matrix Implementation
--- Transpose
+-- |transpose is transpose of matrix.
 transpose :: Matrix a -> Matrix a
 transpose = fromList . transposeMat . toList
 
--- indexMat
+-- |index represents index of matrix of that position.
+-- Example: index [[1,2],[3,4]] = [[(0,0), (0,1)], [(1,0),(1,1)]]
 index :: Matrix a -> [[(Int, Int)]]
 index = indexMat . toList
 
--- determinant
+-- |det is determinant of matrix.
 det :: Num a => Matrix a -> a
 det m | isSquare m = (detMat . toList) m
       | otherwise  = error "It's not Square matrix"
 
--- isSquare
+-- |isSquare
 isSquare :: Matrix a -> Bool
 isSquare m = all (== length m) (length <$> m)
 
--- isInvertible
+-- |isInvertible
 isInvertible :: (Eq a, Num a) => Matrix a -> Bool
 isInvertible m = det m /= 0
 
--- Inverse
+-- |inv is inverse of matrix.
 inv :: (Eq a, Fractional a) => Matrix a -> Matrix a
 inv m | isInvertible m = (fromList . invMat . toList) m
       | otherwise      = error "Matrix is not invertible!"
