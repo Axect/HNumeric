@@ -110,12 +110,15 @@ m %+% n = zipWith (+) <$> m <*> n
 (%-%) :: Num a => Matrix a -> Matrix a -> Matrix a
 m %-% n = zipWith (-) <$> m <*> n
 
--- Multiplication Matrix
 -- TODO: Matrix Multiplication
 --(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
---m %*% n = zipWith (*) <$> m <*> n
+--m %*% n = 
 
--- Divide Matrix
+--blockPartition :: Matrix a -> (Matrix a, Matrix a, Matrix a, Matrix a)
+--blockPartition m | even m = 
+--  where l = length m
+--        sl = floor $ sqrt (fromIntegral l)
+
 -- TODO: Multiplicate Inverse Matrix
 --(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
 --m %/% n = zipWith (/) <$> m <*> n
@@ -180,7 +183,7 @@ inv m | isInvertible m = (fromList . invMat . toList) m
 -- Useful Function
 -- Transpose
 transposeMat :: [[a]] -> [[a]]
-transposeMat m = map (\l -> map (!! l) m) [0 .. (length m - 1)]
+transposeMat m = map (\l -> map (!! l) m) [0 .. (length (head m) - 1)]
 
 -- indexMat
 indexMat :: [[a]] -> [[(Int, Int)]]
