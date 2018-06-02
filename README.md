@@ -18,9 +18,34 @@ Then, just type next command
 git clone https://github.com/Axect/HNumeric
 ```
 
-### 2. Import to Stack project
+### 2. Cabal Install
 
-If you use this package to your own project, then you should change `stack.yaml` and `[own_package].cabal`
+First, install prerequisite.
+
+```sh
+cabal install normaldistribution
+```
+  
+Second, install tarball & unpack.
+
+```sh
+wget https://github.com/Axect/HNumeric/blob/master/dist/HNumeric-0.1.0.0.tar.gz
+
+tar -xvf HNumeric-0.1.0.0.tar.gz
+```
+
+Finally, build & install
+
+```sh
+cabal build
+cabal install
+```
+
+Finish!
+
+### 3. Import to Stack project
+
+If you use this package to your own project, then you should change `stack.yaml` and `package.yaml`
 
 #### 1) Change `stack.yaml`
 
@@ -150,6 +175,6 @@ rse v w
 
 ### TODO
 
-* Effective Matrix Multiplication
+* ~~Effective Matrix Multiplication~~
 * Write Vector to CSV
-* Haddock
+* ~~Haddock~~
