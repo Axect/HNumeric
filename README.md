@@ -29,7 +29,7 @@ cabal install normaldistribution
 Second, install tarball & unpack.
 
 ```sh
-wget https://github.com/Axect/HNumeric/blob/master/dist/HNumeric-0.1.0.0.tar.gz
+wget -O HNumeric-0.1.0.0.tar.gz https://github.com/Axect/HNumeric/blob/master/dist/HNumeric-0.1.0.0.tar.gz\?raw\=true
 
 tar -xvf HNumeric-0.1.0.0.tar.gz
 ```
