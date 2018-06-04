@@ -1,5 +1,5 @@
 {-|
-Module      : HNum.Vector
+Module      : HNumeric.Vector
 Description : Haskell Vector & Matrix & Linear Algebra Library to do machine learning
 CopyRight   : (c) Tae Geun Kim, 2018
 License     : GPL-3
@@ -11,11 +11,12 @@ module HNum.Vector where
 import           Data.Functor                   ( )
 import           Control.Applicative            ( )
 
--- Vector Implementation
+-- Type Section
 newtype Vector a = Vector [a] deriving (Show, Eq)
 
 type Matrix a    = Vector [a]
 
+-- Instance Section
 instance Functor Vector where
   fmap f (Vector x) = Vector (fmap f x)
 
@@ -53,33 +54,26 @@ fromList = Vector
 
 -- Operation
 {-|
-   (.+) is addition Vector with Constant.
+   (.<ops>) is an operation Vector with Constant.
    Dot means position of Vector.
    Example: a .* 2  = twice whole elements of a
             a .*. b = Dot product
 -}
-(.+) :: Num a => Vector a -> a -> Vector a
-v .+ n = (+ n) <$> v
+class Functor f => Numeric f where
+  (.+) :: Num a => f a -> a -> f a
+  (.-) :: Num a => f a -> a -> f a
+  (.*) :: Num a => f a -> a -> f a
+  (./) :: Fractional a => f a -> a -> f a
+  (.^) :: Floating a => f a -> a -> f a
+  (.*.) :: Num a => f a -> f a -> a
 
--- Subtraction
-(.-) :: Num a => Vector a -> a -> Vector a
-v .- n = (+ (-n)) <$> v
-
--- Multiplication
-(.*) :: Num a => Vector a -> a -> Vector a
-v .* n = (* n) <$> v
-
--- Divide
-(./) :: Fractional a => Vector a -> a -> Vector a
-v ./ n = (/ n) <$> v
-
--- |(.^) is power function. Don't confuse with bitwise function.
-(.^) :: Floating a => Vector a -> a -> Vector a
-v .^ n = (** n) <$> v
-
--- |(.*.) is dot product of two vectors.
-(.*.) :: Num a => Vector a -> Vector a -> a
-v .*. w = sum $ v * w
+instance Numeric Vector where
+  v .+ n = (+ n) <$> v
+  v .- n = (+ negate n) <$> v
+  v .* n = (* n) <$> v
+  v ./ n = (/ n) <$> v
+  v .^ n = (** n) <$> v
+  v .*. w = sum $ v * w
 
 {-|
    (%+) is addition Matrix with Constant.

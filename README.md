@@ -182,3 +182,4 @@ rse v w
 * ~~Haddock~~
 * DataFrame using Map
 * Fix Matrix Implementation
+* Numeric Class Define
