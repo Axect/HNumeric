@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c184e23708835bbe690a6d47f5d038f26abb1fd364a0d11f25e770c25b6eeb4b
+-- hash: de4bf37cb7df9fd1954db6e50e20a4c5738a0d495588eac0e04165af91106cc7
 
 name:           HNumeric
 version:        0.2.0.0
@@ -28,9 +28,9 @@ source-repository head
 
 library
   exposed-modules:
-      CSV
-      Stats
-      Vector
+      HNum.CSV
+      HNum.Stats
+      HNum.Vector
   other-modules:
       Paths_HNumeric
   hs-source-dirs:

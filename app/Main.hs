@@ -1,8 +1,8 @@
 module Main where
 
-import           Vector
-import           Stats
-import           CSV
+import           HNum.Vector
+import           HNum.Stats
+import           HNum.CSV
 import           Data.Random.Normal
 
 main :: IO ()

@@ -1,6 +1,6 @@
-module Stats where
+module HNum.Stats where
 
-import           Vector
+import           HNum.Vector
 
 type Coeff a = (a, a)
 

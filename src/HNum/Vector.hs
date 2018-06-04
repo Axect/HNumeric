@@ -1,12 +1,12 @@
 {-|
-Module      : Vector
+Module      : HNum.Vector
 Description : Haskell Vector & Matrix & Linear Algebra Library to do machine learning
 CopyRight   : (c) Tae Geun Kim, 2018
 License     : GPL-3
 Maintainer  : edeftg@gmail.com
 Stability   : Experimental
 -}
-module Vector where
+module HNum.Vector where
 
 import           Data.Functor                   ( )
 import           Control.Applicative            ( )

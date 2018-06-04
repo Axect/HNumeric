@@ -1,6 +1,6 @@
-module CSV where
+module HNum.CSV where
 
-import           Vector
+import           HNum.Vector
 
 data DataFrame = DataFrame { header :: Vector String
                            , numeric :: Matrix Double
