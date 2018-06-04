@@ -97,7 +97,7 @@ instance (Num a) => Num (Matrix a) where
   signum m = signum <$> m
   abs m = abs <$> m
 
-instance (Fractional m) => Fractional (Matrix a) where
+instance (Fractional a) => Fractional (Matrix a) where
   recip m = recip <$> m
   (/) m1 m2 = (*) <$> m1 <*> recip m2
   fromRational n = fromRational <$> Matrix [[n]]
