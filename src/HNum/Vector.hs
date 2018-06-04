@@ -11,10 +11,11 @@ module HNum.Vector where
 import           Data.Functor                   ( )
 import           Control.Applicative            ( )
 
+---------------------------------------------------
+-- Vector
+--------------------------------------------------
 -- Type Section
 newtype Vector a = Vector [a] deriving (Show, Eq)
-
-type Matrix a    = Vector [a]
 
 -- Instance Section
 instance Functor Vector where
@@ -75,123 +76,153 @@ instance Numeric Vector where
   v .^ n = (** n) <$> v
   v .*. w = sum $ v * w
 
+---------------------------------------------------
+-- Matrix
+---------------------------------------------------
+
+newtype Matrix a = Matrix [[a]] deriving (Eq, Show)
+
+instance Functor Matrix where
+  fmap f (Matrix xs) = Matrix (fmap (fmap f) xs)
+
+instance Applicative Matrix where
+  pure a = Matrix []
+  Matrix fs <*> Matrix xs = Matrix (zipWith (zipWith ($)) fs xs)
+
+instance (Num a) => Num (Matrix a) where
+  negate m = negate <$> m
+  (+) m1 m2 = (+) <$> m1 <*> m2
+  (*) m1 m2 = (*) <$> m1 <*> m2
+  fromInteger n = fromInteger <$> Matrix [[n]]
+  signum m = signum <$> m
+  abs m = abs <$> m
+
+instance (Fractional m) => Fractional (Matrix a) where
+  recip m = recip <$> m
+  (/) m1 m2 = (*) <$> m1 <*> recip m2
+  fromRational n = fromRational <$> Matrix [[n]]
+
+--instance Foldable Matrix where
+--  foldr _ z (Matrix []) = z
+--  foldr f z (Matrix xs) = foldr f z xs
+
 {-|
    (%+) is addition Matrix with Constant.
    % means position of Matrix.
    Example: a %* 2  = twice whole elements of a.
             a %*% b = Matrix multiplication.
 -}
-(%+) :: Num a => Matrix a -> a -> Matrix a
-m %+ a = map (+ a) <$> m
-
--- Subtraction Matrix with Constant
-(%-) :: Num a => Matrix a -> a -> Matrix a
-m %- a = map (+ (-a)) <$> m
-
--- Multiplication Matrix with Constant
-(%*) :: Num a => Matrix a -> a -> Matrix a
-m %* a = map (* a) <$> m
-
--- Divide Matrix with Constant
-(%/) :: Fractional a => Matrix a -> a -> Matrix a
-m %/ a = map (/ a) <$> m
-
--- |(%+%) is addition between two matrix.
-(%+%) :: Num a => Matrix a -> Matrix a -> Matrix a
-Vector [] %+% m         = m
-m         %+% Vector [] = m
-m         %+% n         = zipWith (+) <$> m <*> n
-
--- Subtraction Matrix
-(%-%) :: Num a => Matrix a -> Matrix a -> Matrix a
-m %-% n = zipWith (-) <$> m <*> n
-
--- |Matrix Multiplication using Devide and Conquer Algorithm.
-(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
-_            %*% Vector []    = Vector []
-Vector []    %*% _            = Vector []
-_            %*% Vector [[]]  = Vector [[]]
-Vector [[] ] %*% _            = Vector [[]]
-Vector [[x]] %*% Vector [[y]] = Vector [[x * y]]
-m            %*% n            = (a11 %++% a12) %**% (a21 %++% a22)
- where
-  (m11, n11) = (bp 1 m, bp 1 n)
-  (m12, n12) = (bp 2 m, bp 2 n)
-  (m21, n21) = (bp 3 m, bp 3 n)
-  (m22, n22) = (bp 4 m, bp 4 n)
-  a11        = (m11 %*% n11) %+% (m12 %*% n21)
-  a12        = (m11 %*% n12) %+% (m12 %*% n22)
-  a21        = (m21 %*% n11) %+% (m22 %*% n21)
-  a22        = (m21 %*% n12) %+% (m22 %*% n22)
-
--- |Block Partitioning
-bp :: Int -> Matrix a -> Matrix a
-bp n m = fromList $ bpMat n (toList m)
-
--- TODO: Multiplicate Inverse Matrix
---(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
---m %/% n = zipWith (/) <$> m <*> n
-
--- Concatenate
--- |(.++.) horizontally concatenate vectors.
-(.++.) :: Vector a -> Vector a -> Vector a
-v .++. w = fromList (toList v ++ toList w)
-
--- |hcat is same as (.++.). It is just julia syntax.
-hcat :: Vector a -> Vector a -> Vector a
-hcat v w = v .++. w
-
--- |(.**.) vertically stack vectors.
-(.**.) :: Vector a -> Vector a -> Matrix a
-v .**. w = fromList (toList v : [toList w])
-
--- |vcat is same as (.**.)
-vcat :: Vector a -> Vector a -> Matrix a
-vcat v w = v .**. w
-
--- |(.:) inserts vector to head of matrix.
-(.:) :: Vector a -> Matrix a -> Matrix a
-v .: m = fromList (toList v : toList m)
-
--- |(%++%) Horizontally concatenate matrices.
-(%++%) :: Matrix a -> Matrix a -> Matrix a
-m %++% n = fromList $ zipWith (++) (toList m) (toList n)
-
--- |(%**%) Vertically concatenate matrices.
-(%**%) :: Matrix a -> Matrix a -> Matrix a
-m %**% n = fromList (toList m ++ toList n)
-
--- |Norm is norm of vector.
-norm :: Floating a => Vector a -> a
-norm v = sqrt $ v .*. v
-
--- Matrix Implementation
--- |transpose is transpose of matrix.
-transpose :: Matrix a -> Matrix a
-transpose = fromList . transposeMat . toList
-
--- |index represents index of matrix of that position.
--- Example: index [[1,2],[3,4]] = [[(0,0), (0,1)], [(1,0),(1,1)]]
-index :: Matrix a -> [[(Int, Int)]]
-index = indexMat . toList
-
--- |det is determinant of matrix.
-det :: Num a => Matrix a -> a
-det m | isSquare m = (detMat . toList) m
-      | otherwise  = error "It's not Square matrix"
-
--- |isSquare
-isSquare :: Matrix a -> Bool
-isSquare m = all (== length m) (length <$> m)
-
--- |isInvertible
-isInvertible :: (Eq a, Num a) => Matrix a -> Bool
-isInvertible m = det m /= 0
-
--- |inv is inverse of matrix.
-inv :: (Eq a, Fractional a) => Matrix a -> Matrix a
-inv m | isInvertible m = (fromList . invMat . toList) m
-      | otherwise      = error "Matrix is not invertible!"
+--(%+) :: Num a => Matrix a -> a -> Matrix a
+--m %+ a = map (+ a) <$> m
+--
+---- Subtraction Matrix with Constant
+--(%-) :: Num a => Matrix a -> a -> Matrix a
+--m %- a = map (+ (-a)) <$> m
+--
+---- Multiplication Matrix with Constant
+--(%*) :: Num a => Matrix a -> a -> Matrix a
+--m %* a = map (* a) <$> m
+--
+---- Divide Matrix with Constant
+--(%/) :: Fractional a => Matrix a -> a -> Matrix a
+--m %/ a = map (/ a) <$> m
+--
+---- |(%+%) is addition between two matrix.
+--(%+%) :: Num a => Matrix a -> Matrix a -> Matrix a
+--Vector [] %+% m         = m
+--m         %+% Vector [] = m
+--m         %+% n         = zipWith (+) <$> m <*> n
+--
+---- Subtraction Matrix
+--(%-%) :: Num a => Matrix a -> Matrix a -> Matrix a
+--m %-% n = zipWith (-) <$> m <*> n
+--
+---- |Matrix Multiplication using Devide and Conquer Algorithm.
+--(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
+--_            %*% Vector []    = Vector []
+--Vector []    %*% _            = Vector []
+--_            %*% Vector [[]]  = Vector [[]]
+--Vector [[] ] %*% _            = Vector [[]]
+--Vector [[x]] %*% Vector [[y]] = Vector [[x * y]]
+--m            %*% n            = (a11 %++% a12) %**% (a21 %++% a22)
+-- where
+--  (m11, n11) = (bp 1 m, bp 1 n)
+--  (m12, n12) = (bp 2 m, bp 2 n)
+--  (m21, n21) = (bp 3 m, bp 3 n)
+--  (m22, n22) = (bp 4 m, bp 4 n)
+--  a11        = (m11 %*% n11) %+% (m12 %*% n21)
+--  a12        = (m11 %*% n12) %+% (m12 %*% n22)
+--  a21        = (m21 %*% n11) %+% (m22 %*% n21)
+--  a22        = (m21 %*% n12) %+% (m22 %*% n22)
+--
+---- |Block Partitioning
+--bp :: Int -> Matrix a -> Matrix a
+--bp n m = fromList $ bpMat n (toList m)
+--
+---- TODO: Multiplicate Inverse Matrix
+----(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
+----m %/% n = zipWith (/) <$> m <*> n
+--
+---- Concatenate
+---- |(.++.) horizontally concatenate vectors.
+--(.++.) :: Vector a -> Vector a -> Vector a
+--v .++. w = fromList (toList v ++ toList w)
+--
+---- |hcat is same as (.++.). It is just julia syntax.
+--hcat :: Vector a -> Vector a -> Vector a
+--hcat v w = v .++. w
+--
+---- |(.**.) vertically stack vectors.
+--(.**.) :: Vector a -> Vector a -> Matrix a
+--v .**. w = fromList (toList v : [toList w])
+--
+---- |vcat is same as (.**.)
+--vcat :: Vector a -> Vector a -> Matrix a
+--vcat v w = v .**. w
+--
+---- |(.:) inserts vector to head of matrix.
+--(.:) :: Vector a -> Matrix a -> Matrix a
+--v .: m = fromList (toList v : toList m)
+--
+---- |(%++%) Horizontally concatenate matrices.
+--(%++%) :: Matrix a -> Matrix a -> Matrix a
+--m %++% n = fromList $ zipWith (++) (toList m) (toList n)
+--
+---- |(%**%) Vertically concatenate matrices.
+--(%**%) :: Matrix a -> Matrix a -> Matrix a
+--m %**% n = fromList (toList m ++ toList n)
+--
+---- |Norm is norm of vector.
+--norm :: Floating a => Vector a -> a
+--norm v = sqrt $ v .*. v
+--
+---- Matrix Implementation
+---- |transpose is transpose of matrix.
+--transpose :: Matrix a -> Matrix a
+--transpose = fromList . transposeMat . toList
+--
+---- |index represents index of matrix of that position.
+---- Example: index [[1,2],[3,4]] = [[(0,0), (0,1)], [(1,0),(1,1)]]
+--index :: Matrix a -> [[(Int, Int)]]
+--index = indexMat . toList
+--
+---- |det is determinant of matrix.
+--det :: Num a => Matrix a -> a
+--det m | isSquare m = (detMat . toList) m
+--      | otherwise  = error "It's not Square matrix"
+--
+---- |isSquare
+--isSquare :: Matrix a -> Bool
+--isSquare m = all (== length m) (length <$> m)
+--
+---- |isInvertible
+--isInvertible :: (Eq a, Num a) => Matrix a -> Bool
+--isInvertible m = det m /= 0
+--
+---- |inv is inverse of matrix.
+--inv :: (Eq a, Fractional a) => Matrix a -> Matrix a
+--inv m | isInvertible m = (fromList . invMat . toList) m
+--      | otherwise      = error "Matrix is not invertible!"
 
 -- Useful Function
 -- Transpose
