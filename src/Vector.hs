@@ -17,7 +17,7 @@ newtype Vector a = Vector [a] deriving (Show, Eq)
 type Matrix a    = Vector [a]
 
 instance Functor Vector where
-  fmap f (Vector x) = Vector (map f x)
+  fmap f (Vector x) = Vector (fmap f x)
 
 instance Applicative Vector where
   pure a                  = Vector []
