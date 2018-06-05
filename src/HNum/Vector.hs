@@ -327,8 +327,14 @@ m     %-*-% n     = zipWith (++) a11 a12 ++ zipWith (++) a21 a22
   a21        = (m21 %-*-% n11) %-+-% (m22 %-*-% n21)
   a22        = (m21 %-*-% n12) %-+-% (m22 %-*-% n22)
 
+zerosVec :: Int -> [Int]
+zerosVec n = take n [0, 0 ..]
+
 eyeMat :: Int -> [[Int]]
 eyeMat n = [ basisVec x n | x <- [0 .. (n - 1)] ]
+
+basisVec :: Int -> Int -> [Int]
+basisVec n m = zerosVec n ++ [1] ++ zerosVec (m - n - 1)
 
 permMat :: Int -> Int -> [[a]] -> [[Int]]
 permMat i j m
@@ -342,5 +348,7 @@ permMat i j m
   = error "Error"
   where idx = eyeMat (length m)
 
---maxMat :: Ord a => [[a]] -> [Int]
-
+--pivotMat' :: (Eq a) => Int -> [[a]] -> [[Int]]
+--pivotMat' n (x:xs) | x !! n >= y =  : pivotMat' (n+1) xs 
+--  | otherwise = 
+--  where y = maximum (map (!!n) xs)
