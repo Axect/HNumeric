@@ -45,13 +45,69 @@ instance Foldable Vector where
   foldl _ z (Vector []) = z
   foldl f z (Vector xs) = foldl f z xs
 
--- |toList makes List from Vector
-toList :: Vector a -> [a]
-toList (Vector xs) = xs
+-- Class for Vector with List
+class List m where
+  toList :: m a -> [a]
+  fromList :: [a] -> m a
 
--- |fromList is equivalent to Vector constructor
-fromList :: [a] -> Vector a
-fromList = Vector
+instance List Vector where
+  toList (Vector xs) = xs
+  fromList = Vector
+
+---------------------------------------------------
+-- Matrix
+---------------------------------------------------
+
+-- |Definition of Matrix
+data Matrix a = Matrix {val :: Vector a, row :: Int, col :: Int, byRow :: Bool} deriving (Eq)
+
+-- |matrix is syntatic sugar to create Matrix
+matrix :: [[a]] -> Matrix a
+matrix = formMat
+
+-- |Matrices is necessary class for Matrix
+class Matrices m where
+  matForm :: m a -> [[a]]
+  formMat :: [[a]] -> m a
+
+instance Matrices Matrix where
+  matForm (Matrix (Vector v) r c b)
+    | r*c /= length v = error "Matrix Dimension Miss Match!"
+    | b = ctake c v
+    | otherwise = dtake c v
+      where ctake :: Int -> [a] -> [[a]]
+            ctake _ [] = []
+            ctake n m = take n m : ctake n (drop n m)
+            dtake :: Int -> [a] -> [[a]]
+            dtake _ [] = []
+            dtake n m = [ptake n m r | r <- [0..(length m `div` n - 1)]]
+            ptake n v r = [v !! x | x <- idx v, x `mod` (length v `div` n) == r]
+            idx v = take (length v) [0..]
+  formMat [] = Matrix (Vector []) 0 0 True
+  formMat xs = Matrix (Vector (concat xs)) (length xs) (length (head xs)) True
+
+instance Show a => Show (Matrix a) where
+  show m = "Matrix " ++ show (matForm m)
+
+instance Functor Matrix where
+  fmap f mat = mat { val = fmap f (val mat) }
+
+instance Applicative Matrix where
+  pure a = matrix []
+  mf <*> mx = mx { val = val mf <*> val mx }
+
+instance Num a => Num (Matrix a) where
+  negate m = negate <$> m
+  (+) m n = (+) <$> m <*> n
+  (*) m n = (*) <$> m <*> n
+  fromInteger a = fromInteger <$> matrix [[a]]
+  signum m = signum <$> m
+  abs m = abs <$> m
+
+instance Fractional a => Fractional (Matrix a) where
+  recip m = recip <$> m
+  (/) m n = (*) <$> m <*> recip n
+  fromRational n = fromRational <$> matrix [[n]]
 
 -- Operation
 {-|
@@ -76,31 +132,26 @@ instance Numeric Vector where
   v .^ n = (** n) <$> v
   v .*. w = sum $ v * w
 
----------------------------------------------------
--- Matrix
----------------------------------------------------
 
-newtype Matrix a = Matrix [[a]] deriving (Eq, Show)
-
-instance Functor Matrix where
-  fmap f (Matrix xs) = Matrix (fmap (fmap f) xs)
-
-instance Applicative Matrix where
-  pure a = Matrix []
-  Matrix fs <*> Matrix xs = Matrix (zipWith (zipWith ($)) fs xs)
-
-instance (Num a) => Num (Matrix a) where
-  negate m = negate <$> m
-  (+) m1 m2 = (+) <$> m1 <*> m2
-  (*) m1 m2 = (*) <$> m1 <*> m2
-  fromInteger n = fromInteger <$> Matrix [[n]]
-  signum m = signum <$> m
-  abs m = abs <$> m
-
-instance (Fractional a) => Fractional (Matrix a) where
-  recip m = recip <$> m
-  (/) m1 m2 = (*) <$> m1 <*> recip m2
-  fromRational n = fromRational <$> Matrix [[n]]
+--instance Functor Matrix where
+--  fmap f (Matrix xs) = Matrix (fmap (fmap f) xs)
+--
+--instance Applicative Matrix where
+--  pure a = Matrix []
+--  Matrix fs <*> Matrix xs = Matrix (zipWith (zipWith ($)) fs xs)
+--
+--instance (Num a) => Num (Matrix a) where
+--  negate m = negate <$> m
+--  (+) m1 m2 = (+) <$> m1 <*> m2
+--  (*) m1 m2 = (*) <$> m1 <*> m2
+--  fromInteger n = fromInteger <$> Matrix [[n]]
+--  signum m = signum <$> m
+--  abs m = abs <$> m
+--
+--instance (Fractional a) => Fractional (Matrix a) where
+--  recip m = recip <$> m
+--  (/) m1 m2 = (*) <$> m1 <*> recip m2
+--  fromRational n = fromRational <$> Matrix [[n]]
 
 --instance Foldable Matrix where
 --  foldr _ z (Matrix []) = z

@@ -2,7 +2,6 @@ module Main where
 
 import           HNum.Vector
 import           HNum.Stats
-import           HNum.CSV
 import           Data.Random.Normal
 
 main :: IO ()
