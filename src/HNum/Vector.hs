@@ -110,13 +110,15 @@ instance Fractional a => Fractional (Matrix a) where
   fromRational n = fromRational <$> matrix [[n]]
 
 instance Foldable Matrix where
-  foldr _ z Matrix (Vector []) _ _ _ = z
-  foldr f z Matrix (Vector xs) _ _ _ = foldr f z xs
+  foldr _ z (Matrix (Vector []) _ _ _) = z
+  foldr f z (Matrix (Vector xs) _ _ _) = foldr f z xs
 
-  foldl _ z Matrix (Vector []) _ _ _ = z
-  foldl f z Matrix (Vector xs) _ _ _ = foldl f z xs
+  foldl _ z (Matrix (Vector []) _ _ _) = z
+  foldl f z (Matrix (Vector xs) _ _ _) = foldl f z xs
 
+---------------------------------------------------
 -- Operation
+---------------------------------------------------
 {-|
    (.<ops>) is an operation Vector with Constant.
    Dot means position of Vector.
@@ -139,62 +141,14 @@ instance Numeric Vector where
   v .^ n = (** n) <$> v
   v .*. w = sum $ v * w
 
+instance Numeric Matrix where
+  v .+ n = (+ n) <$> v
+  v .- n = (+ negate n) <$> v
+  v .* n = (* n) <$> v
+  v ./ n = (/ n) <$> v
+  v .^ n = (** n) <$> v
+  v .*. w = sum $ v * w
 
---instance Functor Matrix where
---  fmap f (Matrix xs) = Matrix (fmap (fmap f) xs)
---
---instance Applicative Matrix where
---  pure a = Matrix []
---  Matrix fs <*> Matrix xs = Matrix (zipWith (zipWith ($)) fs xs)
---
---instance (Num a) => Num (Matrix a) where
---  negate m = negate <$> m
---  (+) m1 m2 = (+) <$> m1 <*> m2
---  (*) m1 m2 = (*) <$> m1 <*> m2
---  fromInteger n = fromInteger <$> Matrix [[n]]
---  signum m = signum <$> m
---  abs m = abs <$> m
---
---instance (Fractional a) => Fractional (Matrix a) where
---  recip m = recip <$> m
---  (/) m1 m2 = (*) <$> m1 <*> recip m2
---  fromRational n = fromRational <$> Matrix [[n]]
-
---instance Foldable Matrix where
---  foldr _ z (Matrix []) = z
---  foldr f z (Matrix xs) = foldr f z xs
-
-{-|
-   (%+) is addition Matrix with Constant.
-   % means position of Matrix.
-   Example: a %* 2  = twice whole elements of a.
-            a %*% b = Matrix multiplication.
--}
---(%+) :: Num a => Matrix a -> a -> Matrix a
---m %+ a = map (+ a) <$> m
---
----- Subtraction Matrix with Constant
---(%-) :: Num a => Matrix a -> a -> Matrix a
---m %- a = map (+ (-a)) <$> m
---
----- Multiplication Matrix with Constant
---(%*) :: Num a => Matrix a -> a -> Matrix a
---m %* a = map (* a) <$> m
---
----- Divide Matrix with Constant
---(%/) :: Fractional a => Matrix a -> a -> Matrix a
---m %/ a = map (/ a) <$> m
---
----- |(%+%) is addition between two matrix.
---(%+%) :: Num a => Matrix a -> Matrix a -> Matrix a
---Vector [] %+% m         = m
---m         %+% Vector [] = m
---m         %+% n         = zipWith (+) <$> m <*> n
---
----- Subtraction Matrix
---(%-%) :: Num a => Matrix a -> Matrix a -> Matrix a
---m %-% n = zipWith (-) <$> m <*> n
---
 ---- |Matrix Multiplication using Devide and Conquer Algorithm.
 --(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
 --_            %*% Vector []    = Vector []
