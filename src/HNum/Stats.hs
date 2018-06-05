@@ -20,11 +20,11 @@ std :: Floating a => Vector a -> a
 std = sqrt . var
 
 cov :: Floating a => Vector a -> Vector a -> Matrix a
-cov x y = Matrix [[var x, cov' x y], [cov' y x, var y]]
+cov x y = matrix [[var x, cov' x y], [cov' y x, var y]]
 
 -- Least Square Method - (Intercept, Slope)
 lm :: Floating a => Vector a -> Vector a -> Coeff a
-lm x y = ((my - b1 * mx), b1)
+lm x y = (my - b1 * mx, b1)
  where
   mx = mean x
   my = mean y
