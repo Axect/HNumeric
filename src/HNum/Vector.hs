@@ -326,3 +326,21 @@ m     %-*-% n     = zipWith (++) a11 a12 ++ zipWith (++) a21 a22
   a12        = (m11 %-*-% n12) %-+-% (m12 %-*-% n22)
   a21        = (m21 %-*-% n11) %-+-% (m22 %-*-% n21)
   a22        = (m21 %-*-% n12) %-+-% (m22 %-*-% n22)
+
+eyeMat :: Int -> [[Int]]
+eyeMat n = [ basisVec x n | x <- [0 .. (n - 1)] ]
+
+permMat :: Int -> Int -> [[a]] -> [[Int]]
+permMat i j m
+  | i < j
+  = take i idx
+    ++ [idx !! j]
+    ++ take (j - i - 1) (drop (i + 1) idx)
+    ++ [idx !! i]
+    ++ drop (j + 1) idx
+  | otherwise
+  = error "Error"
+  where idx = eyeMat (length m)
+
+--maxMat :: Ord a => [[a]] -> [Int]
+
