@@ -183,5 +183,5 @@ rse v w
 * Write Vector to CSV
 * ~~Haddock~~
 * DataFrame using Map
-* Fix Matrix Implementation
-* Numeric Class Define
+* ~~Fix Matrix Implementation~~
+* ~~Numeric Class Define~~
