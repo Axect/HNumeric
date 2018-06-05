@@ -81,10 +81,10 @@ Then enjoy!
 * HNum.Stats
 * ~~CSV~~
 
-### Basic Vector Use
+### Basic Vector Usage
 
 ```haskell
--- HNumeric-0.1.0.0 Documentation
+-- HNumeric-0.2.0.0 Documentation
 
 let a = Vector [1,2,3] -- Vector declaration
 let b = Vector [4,5,6]
@@ -110,18 +110,11 @@ a + b -- Vector [5,7,9]
 -- Also dot product is here.
 a .*. b -- 1*4 + 2*5 + 3*6 = 32
 
--- Horizontal concatenate
-a .++. b -- Vector [1,2,3,4,5,6]
--- or
-hcat a b
+-- Declare Matrix (Syntactic Sugar)
+let c = matrix [[1,2],[3,4]]
 
--- Vertical Concatenate
-a .**. b -- Vector [[1,2,3],[4,5,6]] -- Matrix Integer
--- or
-vcat a b
-
--- Declare Matrix
-let c = Vector [[1,2],[3,4]]
+-- or Declare using R Syntax
+let d = Matrix {val = Vector [1,2,3,4], row = 2, col = 2, byRow = True}
 
 -- Determinant
 det c
@@ -130,16 +123,10 @@ det c
 inv c
 
 -- Matrix ops with Constant (+, -, *, /, ^)
-c %+ 1 -- Vector [[2,3],[4,5]]
+c .+ 1 -- Matrix [[2,3],[4,5]]
 
 -- Matrix ops with Matrix (+, -)
-c %+% c -- Vector [[2,4],[6,8]]
-
--- Vector concat with Matrix
-Vector [0,1] .: c -- Vector [[0,1],[1,2],[3,4]]
-
--- Matrix concat with Matrix
-c %++% c -- Vector [[1,2],[3,4],[1,2],[3,4]]
+c + c -- Matrix [[2,4],[6,8]]
 ```
 
 ### Basic Stats Usage
