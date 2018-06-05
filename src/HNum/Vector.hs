@@ -72,7 +72,7 @@ class Matrices m where
 
 instance Matrices Matrix where
   matForm (Matrix (Vector v) r c b)
-    | r*c /= length v = error "Matrix Dimension Miss Match!"
+    | r*c /= length v = error "Matrix Dimension mismatch!"
     | b = ctake c v
     | otherwise = dtake c v
       where ctake :: Int -> [a] -> [[a]]
@@ -150,26 +150,13 @@ instance Numeric Matrix where
   v .*. w = sum $ v * w
 
 ---- |Matrix Multiplication using Devide and Conquer Algorithm.
---(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
---_            %*% Vector []    = Vector []
---Vector []    %*% _            = Vector []
---_            %*% Vector [[]]  = Vector [[]]
---Vector [[] ] %*% _            = Vector [[]]
---Vector [[x]] %*% Vector [[y]] = Vector [[x * y]]
---m            %*% n            = (a11 %++% a12) %**% (a21 %++% a22)
--- where
---  (m11, n11) = (bp 1 m, bp 1 n)
---  (m12, n12) = (bp 2 m, bp 2 n)
---  (m21, n21) = (bp 3 m, bp 3 n)
---  (m22, n22) = (bp 4 m, bp 4 n)
---  a11        = (m11 %*% n11) %+% (m12 %*% n21)
---  a12        = (m11 %*% n12) %+% (m12 %*% n22)
---  a21        = (m21 %*% n11) %+% (m22 %*% n21)
---  a22        = (m21 %*% n12) %+% (m22 %*% n22)
---
----- |Block Partitioning
---bp :: Int -> Matrix a -> Matrix a
---bp n m = fromList $ bpMat n (toList m)
+(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
+m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
+        | otherwise      = matrix $ matForm m %-*-% matForm n
+
+-- |Block Partitioning
+bp :: Int -> Matrix a -> Matrix a
+bp n m = matrix $ bpMat n (matForm m)
 --
 ---- TODO: Multiplicate Inverse Matrix
 ----(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
@@ -236,7 +223,9 @@ instance Numeric Matrix where
 --inv m | isInvertible m = (fromList . invMat . toList) m
 --      | otherwise      = error "Matrix is not invertible!"
 
--- Useful Function
+---------------------------------------------------
+-- Useful Functions
+---------------------------------------------------
 -- Transpose
 transposeMat :: [[a]] -> [[a]]
 transposeMat m = map (\l -> map (!! l) m) [0 .. (length (head m) - 1)]
@@ -311,3 +300,29 @@ bpMat n m | n == 1    = (map (take sl) . take sl) m
  where
   l  = length m
   sl = (floor . sqrt . fromIntegral) l
+
+-- Matrix + Matrix
+(%-+-%) :: Num a => [[a]] -> [[a]] -> [[a]]
+m    %-+-% []   = m
+[]   %-+-% m    = m
+[[]] %-+-% m    = m
+m    %-+-% [[]] = m
+m    %-+-% n    = zipWith (zipWith (+)) m n
+
+-- Matrix Multiplication
+(%-*-%) :: Num a => [[a]] -> [[a]] -> [[a]]
+_     %-*-% []    = []
+[]    %-*-% _     = []
+_     %-*-% [[]]  = [[]]
+[[] ] %-*-% _     = [[]]
+[[x]] %-*-% [[y]] = [[x * y]]
+m     %-*-% n     = zipWith (++) a11 a12 ++ zipWith (++) a21 a22
+ where
+  (m11, n11) = (bpMat 1 m, bpMat 1 n)
+  (m12, n12) = (bpMat 2 m, bpMat 2 n)
+  (m21, n21) = (bpMat 3 m, bpMat 3 n)
+  (m22, n22) = (bpMat 4 m, bpMat 4 n)
+  a11        = (m11 %-*-% n11) %-+-% (m12 %-*-% n21)
+  a12        = (m11 %-*-% n12) %-+-% (m12 %-*-% n22)
+  a21        = (m21 %-*-% n11) %-+-% (m22 %-*-% n21)
+  a22        = (m21 %-*-% n12) %-+-% (m22 %-*-% n22)
