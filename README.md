@@ -29,7 +29,7 @@ cabal install normaldistribution
 Second, install tarball & unpack.
 
 ```sh
-export VERSION=0.1.0.0
+export VERSION=0.2.0.0
 
 wget -O HNumeric-${VERSION}.tar.gz https://github.com/Axect/HNumeric/blob/master/dist/HNumeric-0.1.0.0.tar.gz\?raw\=true
 
@@ -77,13 +77,15 @@ Then enjoy!
 
 ### Import Module
 
-* Vector
-* Stats
-* CSV
+* HNum.Vector
+* HNum.Stats
+* ~~CSV~~
 
 ### Basic Vector Use
 
 ```haskell
+-- HNumeric-0.1.0.0 Documentation
+
 let a = Vector [1,2,3] -- Vector declaration
 let b = Vector [4,5,6]
 
