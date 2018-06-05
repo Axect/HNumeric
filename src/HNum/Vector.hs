@@ -109,6 +109,13 @@ instance Fractional a => Fractional (Matrix a) where
   (/) m n = (*) <$> m <*> recip n
   fromRational n = fromRational <$> matrix [[n]]
 
+instance Foldable Matrix where
+  foldr _ z Matrix (Vector []) _ _ _ = z
+  foldr f z Matrix (Vector xs) _ _ _ = foldr f z xs
+
+  foldl _ z Matrix (Vector []) _ _ _ = z
+  foldl f z Matrix (Vector xs) _ _ _ = foldl f z xs
+
 -- Operation
 {-|
    (.<ops>) is an operation Vector with Constant.
