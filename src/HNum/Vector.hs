@@ -120,12 +120,12 @@ instance Foldable Matrix where
 -- Operation
 ---------------------------------------------------
 {-|
-   (.<ops>) is an operation Vector with Constant.
+   (.<ops>) is an operation Vector(or Matrix) with Constant.
    Dot means position of Vector.
    Example: a .* 2  = twice whole elements of a
             a .*. b = Dot product
 -}
-class Functor f => Numeric f where
+class Functor f => VecOps f where
   (.+) :: Num a => f a -> a -> f a
   (.-) :: Num a => f a -> a -> f a
   (.*) :: Num a => f a -> a -> f a
@@ -133,7 +133,15 @@ class Functor f => Numeric f where
   (.^) :: Floating a => f a -> a -> f a
   (.*.) :: Num a => f a -> f a -> a
 
-instance Numeric Vector where
+{-
+   MatOps is just additional operations for Matrices.
+-}
+class Functor f => MatOps f where
+  (%*%) :: Num a => f a -> f a -> f a
+  det :: Fractional a => f a -> a
+  inv :: Fractional a => f a -> f a
+
+instance VecOps Vector where
   v .+ n = (+ n) <$> v
   v .- n = (+ negate n) <$> v
   v .* n = (* n) <$> v
@@ -141,18 +149,26 @@ instance Numeric Vector where
   v .^ n = (** n) <$> v
   v .*. w = sum $ v * w
 
-instance Numeric Matrix where
+instance VecOps Matrix where
   v .+ n = (+ n) <$> v
   v .- n = (+ negate n) <$> v
   v .* n = (* n) <$> v
   v ./ n = (/ n) <$> v
   v .^ n = (** n) <$> v
   v .*. w = sum $ v * w
+
+instance MatOps Matrix where
+  m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
+          | otherwise      = matrix $ matForm m %-*-% matForm n
+  det m | col m /= row m = error "Can't calculate determinant of non-square matrix"
+        | otherwise = detMat (matForm m)
+  inv m | col m /= row m = error "Can't calculate inverse of non-square matrix"
+        | otherwise = (matrix . invMat . matForm) m
 
 ---- |Matrix Multiplication using Devide and Conquer Algorithm.
-(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
-m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
-        | otherwise      = matrix $ matForm m %-*-% matForm n
+--(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
+--m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
+--        | otherwise      = matrix $ matForm m %-*-% matForm n
 
 -- |Block Partitioning
 bp :: Int -> Matrix a -> Matrix a
@@ -252,43 +268,6 @@ dropAtMat' :: Int -> [[a]] -> [[a]]
 dropAtMat' n mat | n /= (length mat - 1) = dropAt n mat
                  | otherwise             = take n mat
 
--- minorMat
-minorMat :: Int -> [[a]] -> [[a]]
-minorMat i m = map tail (dropAtMat' i m)
-
--- picewise Determinant
-pwDet :: Num a => Int -> [[a]] -> a
-pwDet _ [[a]] = a
-pwDet n mat   = (-1) ^ n * head (mat !! n) * sum
-  [ pwDet m mat2 | m <- [0 .. (length mat2 - 1)] ]
-  where mat2 = minorMat n mat
-
--- det for [[a]]
-detMat :: Num a => [[a]] -> a
-detMat mat = sum [ pwDet n mat | n <- [0 .. (length mat - 1)] ]
-
--- cofactor
-cofactorMat :: Num a => Int -> Int -> [[a]] -> a
-cofactorMat i j = (* (-1) ^ (i + j)) . detMat . dropAtMat i j
-
---inverse
-invMat :: Fractional a => [[a]] -> [[a]]
-invMat = toMat . invFlat
-
-invFlat :: Fractional a => [[a]] -> [a]
-invFlat m = do
-  let d   = abs (detMat m)
-  let idx = (transposeMat . indexMat) m
-  (i, j) <- concat idx
-  [cofactorMat i j m / d]
-
--- Vector to Mat
-toMat :: [a] -> [[a]]
-toMat m = do
-  i <- [0 .. (l - 1)]
-  [take l (drop (l * i) m)]
-  where l = (floor . sqrt) (fromIntegral (length m))
-
 -- Block Partitioning
 bpMat :: Int -> [[a]] -> [[a]]
 bpMat _ [] = []
@@ -308,6 +287,17 @@ m    %-+-% []   = m
 [[]] %-+-% m    = m
 m    %-+-% [[]] = m
 m    %-+-% n    = zipWith (zipWith (+)) m n
+
+negMap :: Num a => [[a]] -> [[a]]
+negMap = map (map negate)
+
+-- Matrix - Matrix
+(%---%) :: Num a => [[a]] -> [[a]] -> [[a]]
+m    %---% []   = m
+[]   %---% m    = map (map negate) m
+[[]] %---% m    = map (map negate) m
+m    %---% [[]] = m
+m    %---% n    = zipWith (zipWith (-)) m n
 
 -- Matrix Multiplication
 (%-*-%) :: Num a => [[a]] -> [[a]] -> [[a]]
@@ -362,27 +352,52 @@ colMat m n = map (!! n) m
 colMaxIdx :: Ord a => [[a]] -> Int -> Int
 colMaxIdx m n = whichMax $ colMat m n
 
-ppMat :: Int -> [[a]] -> [[a]]
-ppMat _ []  = []
-ppMat _ [x] = [x]
-ppMat n m | n == 1 = (map (take l) . take l) m
-          | n == 2 = (map (drop 1) . take l) m
-          | n == 3 = (map (take l) . drop 1) m
-          | n == 4 = (map (drop 1) . drop 1) m
-          | n == 0 = (map (drop 1 . take l) . drop 1 . take l) m
+-- | Another Block Partitioning
+bpMat' :: Int -> [[a]] -> [[a]]
+bpMat' _ []  = []
+bpMat' _ [x] = [x]
+bpMat' n m | n == 1 = (map (take l) . take l) m
+           | n == 2 = (map (drop 1) . take l) m
+           | n == 3 = (map (take l) . drop 1) m
+           | n == 4 = (map (drop 1) . drop 1) m
+           | n == 0 = (map (drop 1 . take l) . drop 1 . take l) m
   where l = length m - 1
 
--- Order ~ 4^n
-detMat' :: Fractional a => [[a]] -> a
-detMat' [[x]] = x
-detMat' m
-  | l == 2 = detMat' m11 * detMat' m22 - detMat' m12 * detMat' m21
-  | otherwise = (detMat' m11 * detMat' m22 - detMat' m12 * detMat' m21)
-  / detMat' m00
+-- | Determinant for Double List - Order ~ 4^n
+detMat :: Fractional a => [[a]] -> a
+detMat [[x]] = x
+detMat m
+  | l == 2    = detMat m11 * detMat m22 - detMat m12 * detMat m21
+  | otherwise = (detMat m11 * detMat m22 - detMat m12 * detMat m21) / detMat m00
  where
   l   = length m
-  m11 = ppMat 1 m
-  m12 = ppMat 2 m
-  m21 = ppMat 3 m
-  m22 = ppMat 4 m
-  m00 = ppMat 0 m
+  m11 = bpMat' 1 m
+  m12 = bpMat' 2 m
+  m21 = bpMat' 3 m
+  m22 = bpMat' 4 m
+  m00 = bpMat' 0 m
+
+-- | Inverse for Double List - Order ~ n * 2^n
+invMat :: Fractional a => [[a]] -> [[a]]
+invMat []    = []
+invMat [[] ] = [[]]
+invMat [[x]] = [[x]]
+invMat m
+  | length m == 2
+  = map (map (/ detMat m))
+    $  zipWith (++) m22          (negMap m12)
+    ++ zipWith (++) (negMap m21) m11
+  | otherwise
+  = zipWith (++) a11 a12 ++ zipWith (++) a21 a22
+ where
+  m11 = bpMat 1 m
+  m12 = bpMat 2 m
+  m21 = bpMat 3 m
+  m22 = bpMat 4 m
+  a00 = invMat m11
+  s   = m22 %---% (m21 %-*-% a00 %-*-% m12)
+  s00 = invMat s
+  a11 = a00 %-+-% (a00 %-*-% m12 %-*-% s00 %-*-% m21 %-*-% a00)
+  a12 = negMap a00 %-*-% m12 %-*-% s00
+  a21 = negMap s00 %-*-% m21 %-*-% a00
+  a22 = s00
