@@ -333,6 +333,7 @@ zerosVec n = take n [0, 0 ..]
 eyeMat :: Int -> [[Int]]
 eyeMat n = [ basisVec x n | x <- [0 .. (n - 1)] ]
 
+-- Position -> Length 
 basisVec :: Int -> Int -> [Int]
 basisVec n m = zerosVec n ++ [1] ++ zerosVec (m - n - 1)
 
@@ -345,10 +346,43 @@ permMat i j m
     ++ [idx !! i]
     ++ drop (j + 1) idx
   | otherwise
-  = error "Error"
+  = permMat j i m
   where idx = eyeMat (length m)
 
---pivotMat' :: (Eq a) => Int -> [[a]] -> [[Int]]
---pivotMat' n (x:xs) | x !! n >= y =  : pivotMat' (n+1) xs 
---  | otherwise = 
---  where y = maximum (map (!!n) xs)
+whichMax :: Ord a => [a] -> Int
+whichMax v = whichMax' v 0 m
+ where
+  m = maximum v
+  whichMax' :: Ord a => [a] -> Int -> a -> Int
+  whichMax' (x : xs) n m' = if x == m' then n else whichMax' xs (n + 1) m'
+
+colMat :: [[a]] -> Int -> [a]
+colMat m n = map (!! n) m
+
+colMaxIdx :: Ord a => [[a]] -> Int -> Int
+colMaxIdx m n = whichMax $ colMat m n
+
+ppMat :: Int -> [[a]] -> [[a]]
+ppMat _ []  = []
+ppMat _ [x] = [x]
+ppMat n m | n == 1 = (map (take l) . take l) m
+          | n == 2 = (map (drop 1) . take l) m
+          | n == 3 = (map (take l) . drop 1) m
+          | n == 4 = (map (drop 1) . drop 1) m
+          | n == 0 = (map (drop 1 . take l) . drop 1 . take l) m
+  where l = length m - 1
+
+-- Order ~ 4^n
+detMat' :: Fractional a => [[a]] -> a
+detMat' [[x]] = x
+detMat' m
+  | l == 2 = detMat' m11 * detMat' m22 - detMat' m12 * detMat' m21
+  | otherwise = (detMat' m11 * detMat' m22 - detMat' m12 * detMat' m21)
+  / detMat' m00
+ where
+  l   = length m
+  m11 = ppMat 1 m
+  m12 = ppMat 2 m
+  m21 = ppMat 3 m
+  m22 = ppMat 4 m
+  m00 = ppMat 0 m
