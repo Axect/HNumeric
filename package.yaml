@@ -12,7 +12,7 @@ extra-source-files:
 
 # Metadata used when publishing your package
 synopsis:            Haskell Numeric Library with pure functionality, R & MATLAB Syntax.
-category:            HNum, library, bsd3
+category:            HNum, library, Numeric, LinearAlgebra, Statistics, bsd3
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
