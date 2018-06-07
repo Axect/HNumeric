@@ -4,8 +4,8 @@
 
 ## Packages
 
-* Vector : Contain vector, matrix, linear algebra
-* Stats : Contain statistical functions
+* HNum.Vector : Contain vector, matrix, linear algebra
+* HNum.Stats : Contain statistical functions
 
 ## Installation
 
@@ -20,30 +20,12 @@ git clone https://github.com/Axect/HNumeric
 
 ### 2. Cabal Install
 
-First, install prerequisite.
-
 ```sh
-cabal install normaldistribution
-```
-  
-Second, install tarball & unpack.
-
-```sh
-export VERSION=0.2.0.0
-
-wget -O HNumeric-${VERSION}.tar.gz https://github.com/Axect/HNumeric/blob/master/dist/HNumeric-${VERSION}.tar.gz\?raw\=true
-
-tar -xvf HNumeric-${VERSION}.tar.gz
+cabal update
+cabal install HNumeric
 ```
 
-Finally, build & install
-
-```sh
-cabal build
-cabal install
-```
-
-Finish!
+That's all!
 
 ### 3. Import to Stack project
 
@@ -79,7 +61,6 @@ Then enjoy!
 
 * HNum.Vector
 * HNum.Stats
-* ~~CSV~~
 
 ### Basic Vector Usage
 
@@ -114,7 +95,7 @@ a .*. b -- 1*4 + 2*5 + 3*6 = 32
 let c = matrix [[1,2],[3,4]]
 
 -- or Declare using R Syntax
-let d = Matrix {val = Vector [1,2,3,4], row = 2, col = 2, byRow = True}
+let d = Matrix {val = Vector [5,6,7,8], row = 2, col = 2, byRow = True}
 
 -- Determinant
 det c
@@ -136,6 +117,17 @@ c %*% d
 
 -- Matrix - Inverse Multiplication
 c %/% d
+
+-- Vector Concatenate
+hcat a b -- Vector [1,2,3,4,5,6]
+vcat a b -- Matrix [[1,2,3],[4,5,6]]
+
+-- Matrix Concatenate
+hcat c d -- Matrix [[1,2,5,6],[3,4,7,8]]
+vcat c d -- Matrix [[1,2],[3,4],[5,6],[7,8]]
+
+-- Insert Vector to Matrix
+Vector [1, 2] .: c -- Matrix [[1,2],[1,2],[3,4]]
 ```
 
 ### Basic Stats Usage
