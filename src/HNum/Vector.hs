@@ -138,8 +138,10 @@ class Functor f => VecOps f where
 -}
 class Functor f => MatOps f where
   (%*%) :: Num a => f a -> f a -> f a
+  (%/%) :: Fractional a => f a -> f a -> f a
   det :: Fractional a => f a -> a
   inv :: Fractional a => f a -> f a
+  transpose :: f a -> f a
 
 instance VecOps Vector where
   v .+ n = (+ n) <$> v
@@ -160,20 +162,16 @@ instance VecOps Matrix where
 instance MatOps Matrix where
   m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
           | otherwise      = matrix $ matForm m %-*-% matForm n
+  m %/% n = m %*% inv n
   det m | col m /= row m = error "Can't calculate determinant of non-square matrix"
         | otherwise = detMat (matForm m)
   inv m | col m /= row m = error "Can't calculate inverse of non-square matrix"
         | otherwise = (matrix . invMat . matForm) m
-
----- |Matrix Multiplication using Devide and Conquer Algorithm.
---(%*%) :: Num a => Matrix a -> Matrix a -> Matrix a
---m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
---        | otherwise      = matrix $ matForm m %-*-% matForm n
+  transpose m = m {byRow = not (byRow m)}
 
 -- |Block Partitioning
 bp :: Int -> Matrix a -> Matrix a
 bp n m = matrix $ bpMat n (matForm m)
---
 ---- TODO: Multiplicate Inverse Matrix
 ----(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
 ----m %/% n = zipWith (/) <$> m <*> n
