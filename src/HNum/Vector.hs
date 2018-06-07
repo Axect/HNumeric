@@ -17,6 +17,9 @@ import           Control.Applicative            ( )
 -- Type Section
 newtype Vector a = Vector [a] deriving (Show, Eq)
 
+vector :: [a] -> Vector a
+vector = Vector
+
 -- Instance Section
 instance Functor Vector where
   fmap f (Vector x) = Vector (fmap f x)
@@ -61,7 +64,7 @@ instance List Vector where
 -- |Definition of Matrix
 data Matrix a = Matrix {val :: Vector a, row :: Int, col :: Int, byRow :: Bool} deriving (Eq)
 
--- |matrix is syntatic sugar to create Matrix
+-- |matrix is syntactic sugar to create Matrix
 matrix :: [[a]] -> Matrix a
 matrix = formMat
 
@@ -167,7 +170,7 @@ instance MatOps Matrix where
         | otherwise = detMat (matForm m)
   inv m | col m /= row m = error "Can't calculate inverse of non-square matrix"
         | otherwise = (matrix . invMat . matForm) m
-  transpose m = m {byRow = not (byRow m)}
+  transpose m = m {row = col m, col = row m, byRow = not (byRow m)}
 
 -- |Block Partitioning
 bp :: Int -> Matrix a -> Matrix a
@@ -192,25 +195,10 @@ instance Concatable Matrix where
   vcat m n | col m == col n = m {val = hcat (val m) (val n), row = row m + row n}
            | otherwise = error "Can't concatenate matrices vertically which have different col"
 
----- |(.++.) horizontally concatenate vectors.
---(.++.) :: Vector a -> Vector a -> Vector a
---v .++. w = fromList (toList v ++ toList w)
---
----- |hcat is same as (.++.). It is just julia syntax.
---hcat :: Vector a -> Vector a -> Vector a
---hcat v w = v .++. w
---
----- |(.**.) vertically stack vectors.
---(.**.) :: Vector a -> Vector a -> Matrix a
---v .**. w = fromList (toList v : [toList w])
---
----- |vcat is same as (.**.)
---vcat :: Vector a -> Vector a -> Matrix a
---vcat v w = v .**. w
---
----- |(.:) inserts vector to head of matrix.
---(.:) :: Vector a -> Matrix a -> Matrix a
---v .: m = fromList (toList v : toList m)
+-- |(.:) inserts vector to head of matrix.
+(.:) :: Vector a -> Matrix a -> Matrix a
+v .: m | length v == col m = matrix (toList v : matForm m)
+       | otherwise         = error "Can't insert length(Vector) /= col(Matrix)"
 --
 ---- |(%++%) Horizontally concatenate matrices.
 --(%++%) :: Matrix a -> Matrix a -> Matrix a
