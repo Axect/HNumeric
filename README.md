@@ -31,7 +31,7 @@ Second, install tarball & unpack.
 ```sh
 export VERSION=0.2.0.0
 
-wget -O HNumeric-${VERSION}.tar.gz https://github.com/Axect/HNumeric/blob/master/dist/HNumeric-0.1.0.0.tar.gz\?raw\=true
+wget -O HNumeric-${VERSION}.tar.gz https://github.com/Axect/HNumeric/blob/master/dist/HNumeric-${VERSION}.tar.gz\?raw\=true
 
 tar -xvf HNumeric-${VERSION}.tar.gz
 ```
@@ -86,8 +86,8 @@ Then enjoy!
 ```haskell
 -- HNumeric-0.2.0.0 Documentation
 
-let a = Vector [1,2,3] -- Vector declaration
-let b = Vector [4,5,6]
+let a = vector [1,2,3] -- Vector declaration
+let b = vector [4,5,6]
 
 -- Print Vector
 print a
@@ -122,11 +122,20 @@ det c
 -- Inverse
 inv c
 
+-- Transpose
+transpose c
+
 -- Matrix ops with Constant (+, -, *, /, ^)
 c .+ 1 -- Matrix [[2,3],[4,5]]
 
 -- Matrix ops with Matrix (+, -)
 c + c -- Matrix [[2,4],[6,8]]
+
+-- Matrix Multiplication
+c %*% d
+
+-- Matrix - Inverse Multiplication
+c %/% d
 ```
 
 ### Basic Stats Usage
