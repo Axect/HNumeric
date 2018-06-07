@@ -2,7 +2,7 @@
 -- See Hoogle, http://www.haskell.org/hoogle/
 
 
--- | Haskell Numeric Library with pure functionality & MATLAB Syntax.
+-- | Haskell Numeric Library with pure functionality, R & MATLAB Syntax.
 --   
 --   Please see the README on GitHub at
 --   <a>https://github.com/Axect/HNumeric#readme</a>
