@@ -172,11 +172,26 @@ instance MatOps Matrix where
 -- |Block Partitioning
 bp :: Int -> Matrix a -> Matrix a
 bp n m = matrix $ bpMat n (matForm m)
----- TODO: Multiplicate Inverse Matrix
-----(%/%) :: Fractional a => Matrix a -> Matrix a -> Matrix a
-----m %/% n = zipWith (/) <$> m <*> n
---
----- Concatenate
+
+---------------------------------------------------
+-- Concatenate
+---------------------------------------------------
+class Functor f => Concatable f where
+  hcat :: f a -> f a -> f a
+  vcat :: f a -> f a -> Matrix a
+
+instance Concatable Vector where
+  hcat v w = fromList (toList v ++ toList w)
+  vcat v w = matrix (toList v : [toList w])
+
+instance Concatable Matrix where
+  hcat m n | row m == row n = matrix (zipWith (++) mf nf)
+           | otherwise = error "Can't concatenate matrices horizontally which have different row"
+           where mf = matForm m
+                 nf = matForm n
+  vcat m n | col m == col n = m {val = hcat (val m) (val n), row = row m + row n}
+           | otherwise = error "Can't concatenate matrices vertically which have different col"
+
 ---- |(.++.) horizontally concatenate vectors.
 --(.++.) :: Vector a -> Vector a -> Vector a
 --v .++. w = fromList (toList v ++ toList w)
