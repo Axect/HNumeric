@@ -135,6 +135,7 @@ class Functor f => VecOps f where
   (./) :: Fractional a => f a -> a -> f a
   (.^) :: Floating a => f a -> a -> f a
   (.*.) :: Num a => f a -> f a -> a
+  norm :: Floating a => f a -> a
 
 {-
    MatOps is just additional operations for Matrices.
@@ -153,6 +154,7 @@ instance VecOps Vector where
   v ./ n = (/ n) <$> v
   v .^ n = (** n) <$> v
   v .*. w = sum $ v * w
+  norm v = sqrt $ v .*. v
 
 instance VecOps Matrix where
   v .+ n = (+ n) <$> v
@@ -161,6 +163,7 @@ instance VecOps Matrix where
   v ./ n = (/ n) <$> v
   v .^ n = (** n) <$> v
   v .*. w = sum $ v * w
+  norm v = sqrt $ v .*. v
 
 instance MatOps Matrix where
   m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
@@ -199,49 +202,9 @@ instance Concatable Matrix where
 (.:) :: Vector a -> Matrix a -> Matrix a
 v .: m | length v == col m = matrix (toList v : matForm m)
        | otherwise         = error "Can't insert length(Vector) /= col(Matrix)"
---
----- |(%++%) Horizontally concatenate matrices.
---(%++%) :: Matrix a -> Matrix a -> Matrix a
---m %++% n = fromList $ zipWith (++) (toList m) (toList n)
---
----- |(%**%) Vertically concatenate matrices.
---(%**%) :: Matrix a -> Matrix a -> Matrix a
---m %**% n = fromList (toList m ++ toList n)
---
----- |Norm is norm of vector.
---norm :: Floating a => Vector a -> a
---norm v = sqrt $ v .*. v
---
----- Matrix Implementation
----- |transpose is transpose of matrix.
---transpose :: Matrix a -> Matrix a
---transpose = fromList . transposeMat . toList
---
----- |index represents index of matrix of that position.
----- Example: index [[1,2],[3,4]] = [[(0,0), (0,1)], [(1,0),(1,1)]]
---index :: Matrix a -> [[(Int, Int)]]
---index = indexMat . toList
---
----- |det is determinant of matrix.
---det :: Num a => Matrix a -> a
---det m | isSquare m = (detMat . toList) m
---      | otherwise  = error "It's not Square matrix"
---
----- |isSquare
---isSquare :: Matrix a -> Bool
---isSquare m = all (== length m) (length <$> m)
---
----- |isInvertible
---isInvertible :: (Eq a, Num a) => Matrix a -> Bool
---isInvertible m = det m /= 0
---
----- |inv is inverse of matrix.
---inv :: (Eq a, Fractional a) => Matrix a -> Matrix a
---inv m | isInvertible m = (fromList . invMat . toList) m
---      | otherwise      = error "Matrix is not invertible!"
 
 ---------------------------------------------------
--- Useful Functions
+-- Backend Functions (Do not Understand)
 ---------------------------------------------------
 -- Transpose
 transposeMat :: [[a]] -> [[a]]
