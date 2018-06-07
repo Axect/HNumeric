@@ -115,6 +115,8 @@ module HNum.Stats
 
 -- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
+
+-- | Basic Statistics Class for Vector
 class VecOps v => Statistical v
 mean :: (Statistical v, Fractional a) => v a -> a
 
@@ -125,6 +127,8 @@ cov' :: (Statistical v, Floating a) => v a -> v a -> a
 cov :: (Statistical v, Floating a) => v a -> v a -> Matrix a
 var :: (Statistical v, Floating a) => v a -> a
 std :: (Statistical v, Floating a) => v a -> a
+
+-- | Correlation Coefficient
 cor :: (Statistical v, Floating a) => v a -> v a -> a
 
 -- | Least Square Method - (Intercept, Slope)

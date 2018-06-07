@@ -9,10 +9,16 @@ Stability   : Experimental
 module HNum.Stats where
 
 import           HNum.Vector
+import           Data.Random.Normal
+import           System.Random
 
 -- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
 
+--------------------------------------------------------
+-- Basic Statistics
+--------------------------------------------------------
+-- | Basic Statistics Class for Vector
 class VecOps v => Statistical v where
   mean :: Fractional a => v a -> a
   -- | Single Valued covariance
@@ -21,6 +27,7 @@ class VecOps v => Statistical v where
   cov :: Floating a => v a -> v a -> Matrix a
   var :: Floating a => v a -> a
   std :: Floating a => v a -> a
+  -- | Correlation Coefficient
   cor :: Floating a => v a -> v a -> a
 
 instance Statistical Vector where
@@ -34,6 +41,9 @@ instance Statistical Vector where
   std = sqrt . var
   cor x y = cov' x y / (std x * std y)
 
+--------------------------------------------------------
+-- Distribution  
+--------------------------------------------------------
 -- | Least Square Method - (Intercept, Slope)
 lm :: Floating a => Vector a -> Vector a -> Coeff a
 lm x y = (my - b1 * mx, b1)
