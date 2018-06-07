@@ -1,6 +1,7 @@
 # HNumeric
 
 ![Travis](https://travis-ci.org/Axect/HNumeric.svg?branch=master)
+![Hackage](https://hackage.haskell.org/package/HNumeric-0.2.1.0)
 
 ## Packages
 
