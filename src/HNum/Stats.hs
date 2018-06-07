@@ -1,3 +1,11 @@
+{-
+Module      : HNumeric.Stats
+Description : Haskell Statistics Library with HNum.Vector
+CopyRight   : (c) Tae Geun Kim, 2018
+License     : BSD3
+Maintainer  : edeftg@gmail.com
+Stability   : Experimental
+-}
 module HNum.Stats where
 
 import           HNum.Vector
@@ -7,7 +15,9 @@ type Coeff a = (a, a)
 
 class VecOps v => Statistical v where
   mean :: Fractional a => v a -> a
+  -- | Single Valued covariance
   cov' :: Floating a => v a -> v a -> a
+  -- | Covariance Matrix
   cov :: Floating a => v a -> v a -> Matrix a
   var :: Floating a => v a -> a
   std :: Floating a => v a -> a

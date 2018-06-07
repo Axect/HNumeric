@@ -2,9 +2,9 @@
 Module      : HNumeric.Vector
 Description : Haskell Vector & Matrix & Linear Algebra Library to do machine learning
 CopyRight   : (c) Tae Geun Kim, 2018
-License     : GPL-3
+License     : BSD3
 Maintainer  : edeftg@gmail.com
-Stability   : Experimental
+Stability   : Stable
 -}
 module HNum.Vector where
 
