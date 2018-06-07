@@ -41,6 +41,24 @@ instance (Fractional a) => Fractional (Vector a) where
   (/) v1 v2      = (*) <$> v1 <*> recip v2
   fromRational n = fromRational <$> Vector [n]
 
+instance (Floating a) => Floating (Vector a) where
+  pi = Vector [pi]
+  exp v = exp <$> v
+  log v = log <$> v
+  sqrt v = sqrt <$> v
+  sin v = sin <$> v
+  cos v = cos <$> v
+  tan v = tan <$> v
+  asin v = asin <$> v
+  acos v = acos <$> v
+  atan v = atan <$> v
+  sinh v = sinh <$> v
+  cosh v = cosh <$> v
+  tanh v = tanh <$> v
+  asinh v = asinh <$> v
+  acosh v = acosh <$> v
+  atanh v = atanh <$> v
+
 instance Foldable Vector where
   foldr _ z (Vector []) = z
   foldr f z (Vector xs) = foldr f z xs
@@ -111,6 +129,24 @@ instance Fractional a => Fractional (Matrix a) where
   recip m = recip <$> m
   (/) m n = (*) <$> m <*> recip n
   fromRational n = fromRational <$> matrix [[n]]
+
+instance (Floating a) => Floating (Matrix a) where
+  pi = matrix [[pi]]
+  exp v = exp <$> v
+  log v = log <$> v
+  sqrt v = sqrt <$> v
+  sin v = sin <$> v
+  cos v = cos <$> v
+  tan v = tan <$> v
+  asin v = asin <$> v
+  acos v = acos <$> v
+  atan v = atan <$> v
+  sinh v = sinh <$> v
+  cosh v = cosh <$> v
+  tanh v = tanh <$> v
+  asinh v = asinh <$> v
+  acosh v = acosh <$> v
+  atanh v = atanh <$> v
 
 instance Foldable Matrix where
   foldr _ z (Matrix (Vector []) _ _ _) = z
