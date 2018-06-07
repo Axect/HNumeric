@@ -26,14 +26,14 @@ catchIO :: IO a -> (Exception.IOException -> IO a) -> IO a
 catchIO = Exception.catch
 
 version :: Version
-version = Version [0,2,2,0] []
+version = Version [0,3,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/kavis/.cabal/bin"
-libdir     = "/home/kavis/.cabal/lib/x86_64-linux-ghc-8.2.2/HNumeric-0.2.2.0-BSWJWvoAKpbFiczWaqLZLS-HNumeric-exe"
+libdir     = "/home/kavis/.cabal/lib/x86_64-linux-ghc-8.2.2/HNumeric-0.3.0.0-6TNcaZ0r5XBLAbTI5chCDi-HNumeric-exe"
 dynlibdir  = "/home/kavis/.cabal/lib/x86_64-linux-ghc-8.2.2"
-datadir    = "/home/kavis/.cabal/share/x86_64-linux-ghc-8.2.2/HNumeric-0.2.2.0"
-libexecdir = "/home/kavis/.cabal/libexec/x86_64-linux-ghc-8.2.2/HNumeric-0.2.2.0"
+datadir    = "/home/kavis/.cabal/share/x86_64-linux-ghc-8.2.2/HNumeric-0.3.0.0"
+libexecdir = "/home/kavis/.cabal/libexec/x86_64-linux-ghc-8.2.2/HNumeric-0.3.0.0"
 sysconfdir = "/home/kavis/.cabal/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath

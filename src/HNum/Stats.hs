@@ -2,30 +2,27 @@ module HNum.Stats where
 
 import           HNum.Vector
 
+-- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
 
--- | Expectation Value
-mean :: Fractional a => Vector a -> a
-mean v = sum v / fromIntegral (length v)
+class VecOps v => Statistical v where
+  mean :: Fractional a => v a -> a
+  cov' :: Floating a => v a -> v a -> a
+  cov :: Floating a => v a -> v a -> Matrix a
+  var :: Floating a => v a -> a
+  std :: Floating a => v a -> a
+  cor :: Floating a => v a -> v a -> a
 
--- | Covariance (Single-Valued)
-cov' :: Floating a => Vector a -> Vector a -> a
-cov' x y
-  | length x <= 1 || length y <= 1 = error "Samples are not enough"
-  | length x /= length y = error "Length is not same"
-  | otherwise = ((x .- mean x) .*. (y .- mean y)) / fromIntegral (length x - 1)
-
--- | Variance
-var :: Floating a => Vector a -> a
-var v = cov' v v
-
--- | Standard Deviation
-std :: Floating a => Vector a -> a
-std = sqrt . var
-
--- | Covariance Matrix
-cov :: Floating a => Vector a -> Vector a -> Matrix a
-cov x y = matrix [[var x, cov' x y], [cov' y x, var y]]
+instance Statistical Vector where
+  mean x = sum x / fromIntegral (length x)
+  cov' x y
+    | length x <= 1 || length y <= 1 = error "Samples are not enough"
+    | length x /= length y = error "Length is not same"
+    | otherwise = ((x .- mean x) .*. (y .- mean y)) / fromIntegral (length x - 1)
+  cov x y = matrix [[var x, cov' x y], [cov' y x, var y]]
+  var v = cov' v v
+  std = sqrt . var
+  cor x y = cov' x y / (std x * std y)
 
 -- | Least Square Method - (Intercept, Slope)
 lm :: Floating a => Vector a -> Vector a -> Coeff a
