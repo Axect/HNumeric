@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 89fcbc30162c33f23c7d1039dcd0059e6402a88d9299d21886eb8a3fbe4214a0
+-- hash: 0492fb3ec715a78de4794aa080fe8bd63186f0fabf37a6653fa6075d241b9f86
 
 name:           HNumeric
 version:        0.3.0.0
@@ -36,19 +36,6 @@ library
       src
   build-depends:
       base >=4.7 && <5
-    , normaldistribution
-  default-language: Haskell2010
-
-executable HNumeric-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_HNumeric
-  hs-source-dirs:
-      app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      HNumeric
-    , base >=4.7 && <5
     , normaldistribution
   default-language: Haskell2010
 

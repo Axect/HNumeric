@@ -9,16 +9,7 @@
 
 ## Installation
 
-### 1. Native Use
-
-You can use this package just change `app/Main.hs`
-Then, just type next command
-
-```bash
-git clone https://github.com/Axect/HNumeric
-```
-
-### 2. Cabal Install
+### 1. Cabal Install
 
 ```sh
 cabal update
@@ -27,7 +18,7 @@ cabal install HNumeric
 
 That's all!
 
-### 3. Import to Stack project
+### 2. Import to Stack project
 
 If you use this package to your own project, then you should change `stack.yaml` and `package.yaml`
 
