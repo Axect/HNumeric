@@ -29,7 +29,8 @@ If you use this package to your own project, then you should change `stack.yaml`
 extra-deps:
   - git: https://github.com/Axect/HNumeric.git
     commit: [Latest Commit]
-  - normaldistribution-1.1.0,3
+  - normaldistribution-1.1.0.3
+  - random-1.1
 ```
 
 * Replace [Latest Commit] with latest commit in [HNumeric Commit](https://github.com/Axect/HNumeric/commits/master)
@@ -42,6 +43,7 @@ dependecies:
 - base
 - HNumeric
 - normaldistribution
+- random
 ```
 
 Then enjoy!
@@ -56,10 +58,10 @@ Then enjoy!
 ### Basic Vector Usage
 
 ```haskell
--- HNumeric-0.2.0.0 Documentation
+-- HNumeric-0.3.0.0 Documentation
 
 let a = vector [1,2,3] -- Vector declaration
-let b = vector [4,5,6]
+let b = Vector [4,5,6] -- small v and large V are same (for convenient)
 
 -- Print Vector
 print a
@@ -68,7 +70,7 @@ print a
 (+1) <$> a 
 
 -- Or MATLAB-like operator (.+, .-, .*, ./, .^)
-a .+ 1
+a .+ 1 -- do not 1 .+ a (. means position of vector)
 
 -- You can make list from vector
 toList a -- [1, 2, 3]
@@ -118,15 +120,15 @@ hcat c d -- Matrix [[1,2,5,6],[3,4,7,8]]
 vcat c d -- Matrix [[1,2],[3,4],[5,6],[7,8]]
 
 -- Insert Vector to Matrix
-Vector [1, 2] .: c -- Matrix [[1,2],[1,2],[3,4]]
+vector [1, 2] .: c -- Matrix [[1,2],[1,2],[3,4]]
 ```
 
 ### Basic Stats Usage
 
 ```haskell
 -- Sample Vector (import Vector)
-v = Vector [1..10]
-w = Vector [10, 9 .. 1]
+v = vector [1..10]
+w = vector [10, 9 .. 1]
 
 -- Mean
 mean v
@@ -156,11 +158,13 @@ rss v w
 rse v w
 ```
 
-### TODO
+### DONE
 
-* ~~Effective Matrix Multiplication~~
-* Write Vector to CSV
-* ~~Haddock~~
-* DataFrame using Map
-* ~~Fix Matrix Implementation~~
-* ~~Numeric Class Define~~
+* Effective Matrix Structure (R-like Structure)
+* Divide and Conquer Matrix Multiplication, Determinant, Inverse
+
+### TODO (2018.06.08)
+
+* DSL Documentation by LaTeX (Soon)
+* Make CSV Package
+* Make DataFrame type
