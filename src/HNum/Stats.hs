@@ -14,6 +14,29 @@ import           System.Random
 
 -- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
+--------------------------------------------------------
+-- Basic Probability
+--------------------------------------------------------
+
+-- | Factorial
+fac :: Integral a => a -> a
+fac 0 = 1
+fac 1 = 1
+fac n = product [1 .. n]
+
+-- | Factorial with start n,end s
+facStop :: Integral a => a -> a -> a
+facStop n s = product [s .. n]
+
+-- | Permutation
+p :: Integral a => a -> a -> a
+n `p` r = facStop n (n - r + 1)
+
+-- | Combination using permutation
+c :: Integral a => a -> a -> a
+n `c` r = (n `p` r) `div` fac r
+
+
 
 --------------------------------------------------------
 -- Basic Statistics
@@ -44,6 +67,7 @@ instance Statistical Vector where
 --------------------------------------------------------
 -- Distribution  
 --------------------------------------------------------
+
 -- | Least Square Method - (Intercept, Slope)
 lm :: Floating a => Vector a -> Vector a -> Coeff a
 lm x y = (my - b1 * mx, b1)

@@ -178,9 +178,9 @@ class Functor f => VecOps f where
 -}
 class Functor f => MatOps f where
   (%*%) :: Num a => f a -> f a -> f a
-  (%/%) :: Fractional a => f a -> f a -> f a
-  det :: Fractional a => f a -> a
-  inv :: Fractional a => f a -> f a
+  (%/%) :: (Eq a, Fractional a) => f a -> f a -> f a
+  det :: (Eq a, Fractional a) => f a -> a
+  inv :: (Eq a, Fractional a) => f a -> f a
   transpose :: f a -> f a
 
 instance VecOps Vector where
@@ -352,6 +352,9 @@ colMat m n = map (!! n) m
 colMaxIdx :: Ord a => [[a]] -> Int -> Int
 colMaxIdx m n = whichMax $ colMat m n
 
+cycleMat :: [[a]] -> [[a]]
+cycleMat (m : ms) = ms ++ [m]
+
 -- | Another Block Partitioning
 bpMat' :: Int -> [[a]] -> [[a]]
 bpMat' _ []  = []
@@ -364,10 +367,11 @@ bpMat' n m | n == 1 = (map (take l) . take l) m
   where l = length m - 1
 
 -- | Determinant for Double List - Order ~ 4^n
-detMat :: Fractional a => [[a]] -> a
+detMat :: (Eq a, Fractional a) => [[a]] -> a
 detMat [[x]] = x
 detMat m
   | l == 2    = detMat m11 * detMat m22 - detMat m12 * detMat m21
+  | d00 == 0  = (-1) ^ (l - 1) * detMat (cycleMat m)
   | otherwise = (detMat m11 * detMat m22 - detMat m12 * detMat m21) / detMat m00
  where
   l   = length m
@@ -376,12 +380,13 @@ detMat m
   m21 = bpMat' 3 m
   m22 = bpMat' 4 m
   m00 = bpMat' 0 m
+  d00 = detMat m00
 
 -- | Inverse for Double List - Order ~ n * 2^n
-invMat :: Fractional a => [[a]] -> [[a]]
+invMat :: (Eq a, Fractional a) => [[a]] -> [[a]]
 invMat []    = []
 invMat [[] ] = [[]]
-invMat [[x]] = [[x]]
+invMat [[x]] = [[1 / x]]
 invMat m
   | length m == 2
   = map (map (/ detMat m))
