@@ -47,9 +47,9 @@ class Functor f => VecOps f
 norm :: (VecOps f, Floating a) => f a -> a
 class Functor f => MatOps f
 (%*%) :: (MatOps f, Num a) => f a -> f a -> f a
-(%/%) :: (MatOps f, Fractional a) => f a -> f a -> f a
-det :: (MatOps f, Fractional a) => f a -> a
-inv :: (MatOps f, Fractional a) => f a -> f a
+(%/%) :: (MatOps f, Eq a, Fractional a) => f a -> f a -> f a
+det :: (MatOps f, Eq a, Fractional a) => f a -> a
+inv :: (MatOps f, Eq a, Fractional a) => f a -> f a
 transpose :: MatOps f => f a -> f a
 
 -- | Block Partitioning
@@ -78,15 +78,16 @@ permMat :: Int -> Int -> [[a]] -> [[Int]]
 whichMax :: Ord a => [a] -> Int
 colMat :: [[a]] -> Int -> [a]
 colMaxIdx :: Ord a => [[a]] -> Int -> Int
+cycleMat :: [[a]] -> [[a]]
 
 -- | Another Block Partitioning
 bpMat' :: Int -> [[a]] -> [[a]]
 
 -- | Determinant for Double List - Order ~ 4^n
-detMat :: Fractional a => [[a]] -> a
+detMat :: (Eq a, Fractional a) => [[a]] -> a
 
 -- | Inverse for Double List - Order ~ n * 2^n
-invMat :: Fractional a => [[a]] -> [[a]]
+invMat :: (Eq a, Fractional a) => [[a]] -> [[a]]
 instance GHC.Classes.Eq a => GHC.Classes.Eq (HNum.Vector.Matrix a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (HNum.Vector.Vector a)
 instance GHC.Show.Show a => GHC.Show.Show (HNum.Vector.Vector a)
@@ -115,6 +116,18 @@ module HNum.Stats
 
 -- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
+
+-- | Factorial
+fac :: Integral a => a -> a
+
+-- | Factorial with start n,end s
+facStop :: Integral a => a -> a -> a
+
+-- | Permutation
+p :: Integral a => a -> a -> a
+
+-- | Combination using permutation
+c :: Integral a => a -> a -> a
 
 -- | Basic Statistics Class for Vector
 class VecOps v => Statistical v
