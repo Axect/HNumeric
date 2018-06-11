@@ -1,8 +1,11 @@
 module HNum.CSV where
 
 import           HNum.Vector
+import qualified Data.Map.Strict               as M
 
-type FilePath = String
+type Header = String
+
+data DataFrame a = Map Header (Vector a) deriving (Show, Eq)
 
 class Functor f => CSVtize f where
   toString :: Show a => f a -> String

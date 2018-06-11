@@ -1,5 +1,5 @@
 name:                HNumeric
-version:             0.3.0.0
+version:             0.3.1.0
 github:              "Axect/HNumeric"
 license:             BSD3
 author:              "Tae Geun Kim"
@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - normaldistribution
 - random
+- containers
 
 library:
   source-dirs: src
