@@ -20,6 +20,9 @@ newtype Vector a = Vector [a] deriving (Show, Eq)
 vector :: [a] -> Vector a
 vector = Vector
 
+vec :: [a] -> Vector a
+vec = Vector
+
 -- Instance Section
 instance Functor Vector where
   fmap f (Vector x) = Vector (fmap f x)
@@ -238,6 +241,20 @@ instance Concatable Matrix where
 (.:) :: Vector a -> Matrix a -> Matrix a
 v .: m | length v == col m = matrix (toList v : matForm m)
        | otherwise         = error "Can't insert length(Vector) /= col(Matrix)"
+
+---------------------------------------------------
+-- Sort
+---------------------------------------------------
+-- | Quick Sort
+qsort :: Ord a => Vector a -> Vector a
+qsort (Vector []) = vec []
+qsort (Vector (x : xs)) =
+  (qsort . vec) [ y | y <- xs, y <= x ] `hcat` vec [x] `hcat` (qsort . vec)
+    [ y | y <- xs, y > x ]
+
+-- | Merge Sort
+--msort :: Ord a => Vector a -> Vector a
+--msort 
 
 ---------------------------------------------------
 -- Backend Functions (Do not Understand)
