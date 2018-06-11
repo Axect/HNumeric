@@ -12,30 +12,19 @@ import           HNum.Vector
 
 -- | Type Aliases for convenience
 type Header = [String]
-type Label = [String]
 
 -- | DataFrame structure to write csv
-data DataFrame a = DataFrame { header :: Header, dat :: Matrix a, lab :: Label} deriving (Show, Eq)
+data DataFrame a = DataFrame { header :: Header, dat :: Matrix a} deriving (Show, Eq)
 
--- | No label dataframe
+-- | dataframe constructor
 dataframe :: Header -> Matrix a -> DataFrame a
-dataframe h m | length h == row m = DataFrame h m (replicate n "value")
+dataframe h m | length h == row m = DataFrame h m
               | otherwise         = error "Length of Header != Length of Data"
   where n = length m `div` length h
 
--- | With label dataframe
-dataframe' :: Header -> Matrix a -> Label -> DataFrame a
-dataframe' h m l
-  | length h == row m && row m == length l = DataFrame h m l
-  | otherwise = error "Length of Header != Length of Data != Length of Label"
-
--- | No label dataframe from Vectors
+-- | dataframe from vectors
 fromVectors :: Header -> [Vector a] -> DataFrame a
 fromVectors h vs = dataframe h (matrix vs') where vs' = map toList vs
-
--- | With label dataframe from Vectors
-fromVectors' :: Header -> [Vector a] -> Label -> DataFrame a
-fromVectors' h vs = dataframe' h (matrix vs') where vs' = map toList vs
 
 instance Functor DataFrame where
   fmap f df = df { dat = fmap f (dat df) }
@@ -55,10 +44,9 @@ instance CSVtize Matrix where
   write title m = writeFile title (toString m)
 
 instance CSVtize DataFrame where
-  toString (DataFrame h m l) = h' ++ "\n" ++ m'
-    where h' = cm h ++ ",label"
-          m' = foldr ((\x y -> x ++ "\n" ++ y) . cm) "" $ matForm $ hcat (show <$> transpose m) l'
-          l' = transpose $ matrix [l]
+  toString (DataFrame h m) = h' ++ "\n" ++ m'
+    where h' = cm h
+          m' = toString (transpose m)
   write title df = writeFile title (toString df)
 
 

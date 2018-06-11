@@ -162,26 +162,18 @@ module HNum.CSV
 
 -- | Type Aliases for convenience
 type Header = [String]
-type Label = [String]
 
 -- | DataFrame structure to write csv
 data DataFrame a
-DataFrame :: Header -> Matrix a -> Label -> DataFrame a
+DataFrame :: Header -> Matrix a -> DataFrame a
 [header] :: DataFrame a -> Header
 [dat] :: DataFrame a -> Matrix a
-[lab] :: DataFrame a -> Label
 
--- | No label dataframe
+-- | dataframe constructor
 dataframe :: Header -> Matrix a -> DataFrame a
 
--- | With label dataframe
-dataframe' :: Header -> Matrix a -> Label -> DataFrame a
-
--- | No label dataframe from Vectors
+-- | dataframe from vectors
 fromVectors :: Header -> [Vector a] -> DataFrame a
-
--- | With label dataframe from Vectors
-fromVectors' :: Header -> [Vector a] -> Label -> DataFrame a
 
 -- | Class to write csv file
 class Functor f => CSVtize f
