@@ -51,35 +51,70 @@ class VecOps v => Statistical v where
   var :: Floating a => v a -> a
   -- | Sample Standard deviation
   std :: Floating a => v a -> a
+  -- | Standard Error
+  se :: Floating a => v a -> a
   -- | Correlation Coefficient
   cor :: Floating a => v a -> v a -> a
+  -- | Median
+  med :: (Ord a, Floating a) => v a -> a
+  -- | Mode
+  mode :: Eq a => v a -> a
   -- | Coefficient of Variation
   cv :: Floating a => v a -> a
+  -- | Moment
+  moment :: Floating a => a -> v a-> a
   -- | Skewness
-  skew :: Floating a => v a -> Int -> a
+  skew :: Floating a => v a -> a
+  -- | Skewness 2
+  skew' :: Floating a => v a -> a
   -- | kurtosis
   kurt :: Floating a => v a -> a
 
 instance Statistical Vector where
+  -- mean
   mean x = sum x / fromIntegral (length x)
+  -- cov'
   cov' x y
     | length x <= 1 || length y <= 1 = error "Samples are not enough"
     | length x /= length y = error "Length is not same"
     | otherwise = ((x .- mean x) .*. (y .- mean y)) / fromIntegral (length x - 1)
+  -- cov
   cov x y = matrix [[var x, cov' x y], [cov' y x, var y]]
+  -- var
   var v = cov' v v
+  -- std
   std = sqrt . var
+  -- se
+  se x = std x / sqrt (fromIntegral (length x))
+  -- cor
   cor x y = cov' x y / (std x * std y)
+  -- med
+  med x | even l    = ((qs !! (l'-1)) + (qs !! l')) / 2
+        | otherwise = qs !! l'
+    where l  = length x
+          l' = l `div` 2
+          qs = (toList . qsort) x
+  -- mode
+  mode x = v !! n
+    where v  = toList x
+          cx = map (`count` v) v
+          m  = maximum cx
+          n  = head $ dropWhile (\p -> cx !! p /= m) [0..]
+  -- cv
   cv x = std x / mean x
-  skew x n | n == 1 = (1 / fromIntegral l) * sum ((x .- mean x) .^ 3) / std x ^ 3
-           | n == 2 = (fromIntegral l^2 / fromIntegral ((l-1) * (l-2))) * skew x 1
-           | otherwise = error "Not implemented"
-      where l = length x
-  kurt x = sum ((x .- mean x) .^ 4) / (fromIntegral l * std x ** 4)
+  -- moment
+  moment n x = sum ((x .- mean x) .^ n)
+  -- skew
+  skew x = (1 / fromIntegral l) * moment 3 x / std x ^ 3
+    where l = length x
+  skew' x = (fromIntegral l^2 / fromIntegral ((l-1) * (l-2))) * skew x
+    where l = length x
+  -- kurt
+  kurt x = moment 4 x / (fromIntegral l * std x ** 4) - 3
     where l = length x
 
 --------------------------------------------------------
--- For DataFrame
+-- For IO
 --------------------------------------------------------
 summary :: (Show a, Floating a) => DataFrame a -> IO ()
 summary df = do
@@ -96,6 +131,18 @@ summary df = do
   hv = zip h vs
   hs = zip h ss
 
+describe :: (Show a, Floating a, Ord a) => Vector a -> IO ()
+describe v = do
+  putStrLn $ "n:    " ++ show (length v)
+  putStrLn $ "mean: " ++ show (mean v)
+  putStrLn $ "std:  " ++ show (std v)
+  putStrLn $ "med:  " ++ show (med v)
+  putStrLn $ "mode: " ++ show (mode v)
+  putStrLn $ "min:  " ++ show (minimum v)
+  putStrLn $ "max:  " ++ show (maximum v)
+  putStrLn $ "skew: " ++ show (skew v)
+  putStrLn $ "kurt: " ++ show (kurt v)
+  putStrLn $ "SE:   " ++ show (se v)
 --------------------------------------------------------
 -- Linear Regression
 --------------------------------------------------------
@@ -118,3 +165,11 @@ rss x y = sum ((y - lineFit (lm x y) x) .^ 2)
 -- | Relative Standard Error
 rse :: Floating a => Vector a -> Vector a -> a
 rse x y = sqrt (1 / fromIntegral (length x - 2) * rss x y)
+
+--------------------------------------------------------
+-- Backend Functions
+--------------------------------------------------------
+
+-- | Count Elements
+count :: Eq a => a -> [a] -> Int
+count p v = length (filter (== p) v)
