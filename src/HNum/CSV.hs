@@ -1,7 +1,6 @@
 module HNum.CSV where
 
 import           HNum.Vector
---import qualified Data.Map.Strict               as M
 
 type Header = [String]
 type Label = [String]

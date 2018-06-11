@@ -30,7 +30,7 @@ version = Version [0,3,1,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/kavis/.cabal/bin"
-libdir     = "/home/kavis/.cabal/lib/x86_64-linux-ghc-8.2.2/HNumeric-0.3.1.0-HMqV3nS1ETPCx3xThaktb6"
+libdir     = "/home/kavis/.cabal/lib/x86_64-linux-ghc-8.2.2/HNumeric-0.3.1.0-7KSlnwNvfNICH10a13FjvZ"
 dynlibdir  = "/home/kavis/.cabal/lib/x86_64-linux-ghc-8.2.2"
 datadir    = "/home/kavis/.cabal/share/x86_64-linux-ghc-8.2.2/HNumeric-0.3.1.0"
 libexecdir = "/home/kavis/.cabal/libexec/x86_64-linux-ghc-8.2.2/HNumeric-0.3.1.0"

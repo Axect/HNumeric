@@ -22,17 +22,6 @@
   (major1) == 4 && (major2) == 10 && (minor) <= 1)
 #endif /* MIN_VERSION_base */
 
-/* package containers-0.5.10.2 */
-#ifndef VERSION_containers
-#define VERSION_containers "0.5.10.2"
-#endif /* VERSION_containers */
-#ifndef MIN_VERSION_containers
-#define MIN_VERSION_containers(major1,major2,minor) (\
-  (major1) <  0 || \
-  (major1) == 0 && (major2) <  5 || \
-  (major1) == 0 && (major2) == 5 && (minor) <= 10)
-#endif /* MIN_VERSION_containers */
-
 /* package normaldistribution-1.1.0.3 */
 #ifndef VERSION_normaldistribution
 #define VERSION_normaldistribution "1.1.0.3"
@@ -199,10 +188,10 @@
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_PACKAGE_KEY
-#define CURRENT_PACKAGE_KEY "HNumeric-0.3.1.0-HMqV3nS1ETPCx3xThaktb6"
+#define CURRENT_PACKAGE_KEY "HNumeric-0.3.1.0-7KSlnwNvfNICH10a13FjvZ"
 #endif /* CURRENT_PACKAGE_KEY */
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "HNumeric-0.3.1.0-HMqV3nS1ETPCx3xThaktb6"
+#define CURRENT_COMPONENT_ID "HNumeric-0.3.1.0-7KSlnwNvfNICH10a13FjvZ"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "0.3.1.0"

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 11a0feeebc6b6a62ffe7fa82f46120add60b92b92bd39869f7a4a16958de92ef
+-- hash: ce543fbe9d1a2354607564a7cc9b45578ee49880af97240e46e90d23d3a5579b
 
 name:           HNumeric
 version:        0.3.1.0
@@ -37,7 +37,6 @@ library
       src
   build-depends:
       base >=4.7 && <5
-    , containers
     , normaldistribution
     , random
   default-language: Haskell2010
@@ -53,7 +52,6 @@ test-suite HNumeric-test
   build-depends:
       HNumeric
     , base >=4.7 && <5
-    , containers
     , normaldistribution
     , random
   default-language: Haskell2010

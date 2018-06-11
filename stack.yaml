@@ -41,7 +41,6 @@ packages:
 extra-deps:
   - normaldistribution-1.1.0.3
   - random-1.1
-  - containers-0.5.11.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
