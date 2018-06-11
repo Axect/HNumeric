@@ -53,6 +53,12 @@ class VecOps v => Statistical v where
   std :: Floating a => v a -> a
   -- | Correlation Coefficient
   cor :: Floating a => v a -> v a -> a
+  -- | Coefficient of Variation
+  cv :: Floating a => v a -> a
+  -- | Skewness
+  skew :: Floating a => v a -> Int -> a
+  -- | kurtosis
+  kurt :: Floating a => v a -> a
 
 instance Statistical Vector where
   mean x = sum x / fromIntegral (length x)
@@ -64,6 +70,13 @@ instance Statistical Vector where
   var v = cov' v v
   std = sqrt . var
   cor x y = cov' x y / (std x * std y)
+  cv x = std x / mean x
+  skew x n | n == 1 = (1 / fromIntegral l) * sum ((x .- mean x) .^ 3) / std x ^ 3
+           | n == 2 = (fromIntegral l^2 / fromIntegral ((l-1) * (l-2))) * skew x 1
+           | otherwise = error "Not implemented"
+      where l = length x
+  kurt x = sum ((x .- mean x) .^ 4) / (fromIntegral l * std x ** 4)
+    where l = length x
 
 --------------------------------------------------------
 -- For DataFrame
@@ -84,7 +97,7 @@ summary df = do
   hs = zip h ss
 
 --------------------------------------------------------
--- Linear
+-- Linear Regression
 --------------------------------------------------------
 -- | Least Square Method - (Intercept, Slope)
 lm :: Floating a => Vector a -> Vector a -> Coeff a
