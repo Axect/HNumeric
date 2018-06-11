@@ -1,10 +1,20 @@
+{-|
+Module      : HNum.CSV
+Description : Simple CSV Library for HNumeric
+CopyRight   : (c) Tae Geun Kim, 2018
+License     : BSD3
+Maintainer  : edeftg@gmail.com
+Stability   : Experimental
+-}
 module HNum.CSV where
 
 import           HNum.Vector
 
+-- | Type Aliases for convenience
 type Header = [String]
 type Label = [String]
 
+-- | DataFrame structure to write csv
 data DataFrame a = DataFrame { header :: Header, dat :: Matrix a, lab :: Label} deriving (Show, Eq)
 
 -- | No label dataframe
@@ -30,6 +40,7 @@ fromVectors' h vs = dataframe' h (matrix vs') where vs' = map toList vs
 instance Functor DataFrame where
   fmap f df = df { dat = fmap f (dat df) }
 
+-- | Class to write csv file
 class Functor f => CSVtize f where
   toString :: Show a => f a -> String
   write :: Show a => String -> f a -> IO ()
