@@ -11,13 +11,13 @@ module HNum.Stats where
 import           HNum.Vector
 import           Data.Random.Normal
 import           System.Random
+import           HNum.CSV
 
 -- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
 --------------------------------------------------------
 -- Basic Probability
 --------------------------------------------------------
-
 -- | Factorial
 fac :: Integral a => a -> a
 fac 0 = 1
@@ -36,19 +36,20 @@ n `p` r = facStop n (n - r + 1)
 c :: Integral a => a -> a -> a
 n `c` r = (n `p` r) `div` fac r
 
-
-
 --------------------------------------------------------
 -- Basic Statistics
 --------------------------------------------------------
 -- | Basic Statistics Class for Vector
 class VecOps v => Statistical v where
+  -- | Sample Mean
   mean :: Fractional a => v a -> a
   -- | Single Valued covariance
   cov' :: Floating a => v a -> v a -> a
   -- | Covariance Matrix
   cov :: Floating a => v a -> v a -> Matrix a
+  -- | Sample Variance
   var :: Floating a => v a -> a
+  -- | Sample Standard deviation
   std :: Floating a => v a -> a
   -- | Correlation Coefficient
   cor :: Floating a => v a -> v a -> a
@@ -65,9 +66,26 @@ instance Statistical Vector where
   cor x y = cov' x y / (std x * std y)
 
 --------------------------------------------------------
--- Distribution  
+-- For DataFrame
 --------------------------------------------------------
+summary :: (Show a, Floating a) => DataFrame a -> IO ()
+summary df = do
+  putStrLn $ "Mean: " ++ show hm
+  putStrLn $ "Var:  " ++ show hv
+  putStrLn $ "Std:  " ++ show hs
+ where
+  h  = header df
+  m  = matForm $ dat df
+  ms = map (mean . vector) m
+  vs = map (var . vector) m
+  ss = map (std . vector) m
+  hm = zip h ms
+  hv = zip h vs
+  hs = zip h ss
 
+--------------------------------------------------------
+-- Linear
+--------------------------------------------------------
 -- | Least Square Method - (Intercept, Slope)
 lm :: Floating a => Vector a -> Vector a -> Coeff a
 lm x y = (my - b1 * mx, b1)
