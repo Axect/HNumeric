@@ -5,3 +5,4 @@
 *.csv
 dist/*
 *.sh
+free/*
