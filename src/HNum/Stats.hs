@@ -167,6 +167,23 @@ rse :: Floating a => Vector a -> Vector a -> a
 rse x y = sqrt (1 / fromIntegral (length x - 2) * rss x y)
 
 --------------------------------------------------------
+-- Technical Analysis
+--------------------------------------------------------
+
+-- | Simple Moving Average
+sma :: Fractional a => Int -> Vector a -> Vector a
+sma p v = vec $ take (p - 1) v' ++ sma' p v'
+ where
+  v' = toList v
+  sma' :: Fractional a => Int -> [a] -> [a]
+  sma' p x
+    | length x < p
+    = []
+    | otherwise
+    = let m = sum (take p x) / fromIntegral p in m : sma' p (tail x)
+
+
+--------------------------------------------------------
 -- Backend Functions
 --------------------------------------------------------
 
