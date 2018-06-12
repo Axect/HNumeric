@@ -30,20 +30,20 @@ instance Functor DataFrame where
   fmap f df = df { dat = fmap f (dat df) }
 
 -- | Class to write csv file
-class Functor f => CSVtize f where
+class Functor f => Writable f where
   toString :: Show a => f a -> String
   write :: Show a => String -> f a -> IO ()
 
-instance CSVtize Vector where
+instance Writable Vector where
   toString v = foldr (\x y -> x ++ "\n" ++ y) "" (show <$> v)
   write title v = writeFile title (toString v)
 
-instance CSVtize Matrix where
+instance Writable Matrix where
   toString m = foldr ((\x y -> x ++ "\n" ++ y) . cm) "" m1
     where m1 = matForm (show <$> m)
   write title m = writeFile title (toString m)
 
-instance CSVtize DataFrame where
+instance Writable DataFrame where
   toString (DataFrame h m) = h' ++ "\n" ++ m'
     where h' = cm h
           m' = toString (transpose m)
