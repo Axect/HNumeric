@@ -31,9 +31,13 @@ dataframe h m | length h == row m = DataFrame h m
 fromVectors :: Header -> [Vector a] -> DataFrame a
 fromVectors h vs = dataframe h (matrix vs') where vs' = map toList vs
 
---(!) :: DataFrame a -> String -> Vector a
---df ! hd = 
---  where i = 
+-- | Extract Vector in DataFrame
+(#) :: Eq a => DataFrame a -> String -> Vector a
+df # hd | hd `notElem` header df = error "No specific header in dataFrame"
+        | otherwise              = vec $ bd !! i
+ where
+  i  = hd `fd` header df
+  bd = matForm $ transpose $ dat df
 
 instance Functor DataFrame where
   fmap f df = df { dat = fmap f (dat df) }

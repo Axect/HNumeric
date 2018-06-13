@@ -77,11 +77,16 @@ class List m where
   fromList :: [a] -> m a
   -- | Extract Element
   (!) :: m a -> Int -> a
+  -- | Find Position of Element
+  findFirst :: Eq a => a -> m a -> Int
 
 instance List Vector where
   toList (Vector xs) = xs
   fromList = Vector
   v ! n = toList v !! n
+  findFirst n v | n `notElem` v = error "Not element!"
+                | otherwise     = snd $ head $ dropWhile (\x -> fst x /= n) idx
+    where idx = zip (toList v) [0..]
 
 ---------------------------------------------------
 -- Matrix
@@ -456,3 +461,9 @@ invMat m
   a12 = negMap a00 %-*-% m12 %-*-% s00
   a21 = negMap s00 %-*-% m21 %-*-% a00
   a22 = s00
+
+-- | Find First 
+fd :: Eq a => a -> [a] -> Int
+fd n v | n `notElem` v = error "Not element!"
+       | otherwise     = snd $ head $ dropWhile (\x -> fst x /= n) idx
+  where idx = zip v [0 ..]
