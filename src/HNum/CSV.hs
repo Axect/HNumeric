@@ -17,7 +17,9 @@ import           HNum.Vector
 type Header = [String]
 
 -- | DataFrame structure to write csv
-data DataFrame a = DataFrame { header :: Header, dat :: Matrix a} deriving (Show, Eq)
+data DataFrame a = DataFrame { header :: Header
+                             , dat :: Matrix a
+                             } deriving (Show, Eq)
 
 -- | dataframe constructor
 dataframe :: Header -> Matrix a -> DataFrame a
@@ -29,8 +31,17 @@ dataframe h m | length h == row m = DataFrame h m
 fromVectors :: Header -> [Vector a] -> DataFrame a
 fromVectors h vs = dataframe h (matrix vs') where vs' = map toList vs
 
+--(!) :: DataFrame a -> String -> Vector a
+--df ! hd = 
+--  where i = 
+
 instance Functor DataFrame where
   fmap f df = df { dat = fmap f (dat df) }
+
+instance Convertable DataFrame where
+  readInt df = read <$> df :: DataFrame Int
+  readInteger df = read <$> df :: DataFrame Integer
+  readDouble df = read <$> df :: DataFrame Double
 
 -----------------------------------------------
 -- Write to CSV
@@ -97,3 +108,4 @@ rmQuot x | null temp = clean
   clean  = takeWhile (/= '"') x
   temp   = dropWhile (/= '"') x
   clean' = tail temp
+

@@ -71,19 +71,28 @@ instance Foldable Vector where
 
 -- Class for Vector with List
 class List m where
+  -- | to List
   toList :: m a -> [a]
+  -- | From List
   fromList :: [a] -> m a
+  -- | Extract Element
+  (!) :: m a -> Int -> a
 
 instance List Vector where
   toList (Vector xs) = xs
   fromList = Vector
+  v ! n = toList v !! n
 
 ---------------------------------------------------
 -- Matrix
 ---------------------------------------------------
 
 -- |Definition of Matrix
-data Matrix a = Matrix {val :: Vector a, row :: Int, col :: Int, byRow :: Bool} deriving (Eq)
+data Matrix a = Matrix { val :: Vector a
+                       , row :: Int
+                       , col :: Int
+                       , byRow :: Bool
+                       } deriving (Eq)
 
 -- |matrix is syntactic sugar to create Matrix
 matrix :: [[a]] -> Matrix a
@@ -91,7 +100,9 @@ matrix = formMat
 
 -- |Matrices is necessary class for Matrix
 class Matrices m where
+  -- | Matrix to Array
   matForm :: m a -> [[a]]
+  -- | Array to Matrix
   formMat :: [[a]] -> m a
 
 instance Matrices Matrix where
@@ -157,6 +168,28 @@ instance Foldable Matrix where
 
   foldl _ z (Matrix (Vector []) _ _ _) = z
   foldl f z (Matrix (Vector xs) _ _ _) = foldl f z xs
+
+---------------------------------------------------
+-- Type Conversion
+---------------------------------------------------
+-- | Syntactic Sugar of read of functor
+class Functor f => Convertable f where
+  -- | Read String to Int
+  readInt :: f String -> f Int
+  -- | Read String to Integer
+  readInteger :: f String -> f Integer
+  -- | Read String to Double
+  readDouble :: f String -> f Double
+
+instance Convertable Vector where
+  readInt v = read <$> v :: Vector Int
+  readInteger v = read <$> v :: Vector Integer
+  readDouble v = read <$> v :: Vector Double
+
+instance Convertable Matrix where
+  readInt m = read <$> m :: Matrix Int
+  readInteger m = read <$> m :: Matrix Integer
+  readDouble m = read <$> m :: Matrix Double
 
 ---------------------------------------------------
 -- Operation

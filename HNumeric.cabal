@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 35b947c6b91e1d075b0700a52de393b87f6749f5649ab43e268623c898e675e3
+-- hash: a31a8bb1239bf98ba7561f43ae6c7fe1005cd190658fb003dd7a222ffd8ae071
 
 name:           HNumeric
-version:        0.3.3.0
+version:        0.4.0.0
 synopsis:       Haskell Numeric Library with pure functionality, R & MATLAB Syntax.
 description:    Please see the README on GitHub at <https://github.com/Axect/HNumeric#readme>
 category:       HNum, library, Numeric, LinearAlgebra, Statistics, bsd3
@@ -29,6 +29,7 @@ source-repository head
 library
   exposed-modules:
       HNum.CSV
+      HNum.F
       HNum.Stats
       HNum.Vector
   other-modules:

@@ -5,7 +5,9 @@
 ## Packages
 
 * HNum.Vector : Contain vector, matrix, linear algebra
-* HNum.Stats : Contain statistical functions
+* HNum.Stats  : Contain statistical functions
+* HNum.CSV    : CSV Tools for HNum (Contain DataFrame)
+* HNum.F      : Functional Programming Tools for HNum
 
 ## Installation
 
@@ -48,12 +50,20 @@ dependecies:
 
 Then enjoy!
 
+## Documentation
+
+Documentation is prepared on authorea
+
+[HNumeric Documentation](https://www.authorea.com/users/223838/articles/307659-hnumeric-documentation)
+
 ## Usage
 
 ### Import Module
 
 * HNum.Vector
 * HNum.Stats
+* HNum.CSV
+* HNum.F
 
 ### Basic Vector Usage
 
@@ -162,9 +172,10 @@ rse v w
 
 * Effective Matrix Structure (R-like Structure)
 * Divide and Conquer Matrix Multiplication, Determinant, Inverse
+* Module CSV with DataFrame (read / write)
+* FuncTools
 
-### TODO (2018.06.08)
+### TODO (2018.06.13)
 
-* DSL Documentation by LaTeX (Soon)
-* Make CSV Package
-* Make DataFrame type
+* DSL Documentation by LaTeX (Developing)
+* More Statistical Tools
