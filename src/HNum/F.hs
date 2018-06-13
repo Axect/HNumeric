@@ -1,7 +1,14 @@
+{- 
+Module      : HNum.F
+Description : Missing Functional Programming tools for HNumeric
+CopyRight   : (c) Tae Geun Kim, 2018
+License     : BSD3
+Maintainer  : edeftg@gmail.com
+Stability   : Experimental
+-}
 module HNum.F where
 
-import           HNum.Vector
-import           HNum.CSV
+import           Data.Functor                   ( )
 
 -- | Functional Programming Tools for HNum Object
 class Functor f => FuncTools f where
@@ -21,24 +28,4 @@ class Functor f => FuncTools f where
   hdrop :: Int -> f a -> f a
   -- | Like dropWhile
   hdropWhile :: (a -> Bool) -> f a -> f a
-
-instance FuncTools Vector where
-  hflat f = f . toList
-  hlift f = vec . f . toList
-  hmap = hlift . map
-  hfilter = hlift . filter
-  htake n = hlift (take n)
-  htakeWhile f = hlift (takeWhile f)
-  hdrop n = hlift (drop n)
-  hdropWhile f = hlift (dropWhile f)
-
-instance FuncTools Matrix where
-  hflat = undefined
-  hlift f = matrix . map f . matForm
-  hmap = hlift . map
-  hfilter = hlift . filter
-  htake n = hlift (take n)
-  htakeWhile f = hlift (takeWhile f)
-  hdrop n = hlift (drop n)
-  hdropWhile f = hlift (dropWhile f)
 

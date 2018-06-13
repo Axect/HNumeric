@@ -1,5 +1,5 @@
 {-|
-Module      : HNumeric.Vector
+Module      : HNum.Vector
 Description : Haskell Vector & Matrix & Linear Algebra Library to do machine learning
 CopyRight   : (c) Tae Geun Kim, 2018
 License     : BSD3
@@ -10,6 +10,7 @@ module HNum.Vector where
 
 import           Data.Functor                   ( )
 import           Control.Applicative            ( )
+import           HNum.F
 
 ---------------------------------------------------
 -- Vector
@@ -173,6 +174,29 @@ instance Foldable Matrix where
 
   foldl _ z (Matrix (Vector []) _ _ _) = z
   foldl f z (Matrix (Vector xs) _ _ _) = foldl f z xs
+
+---------------------------------------------------
+-- FuncTools
+---------------------------------------------------
+instance FuncTools Vector where
+      hflat f = f . toList
+      hlift f = vec . f . toList
+      hmap = hlift . map
+      hfilter = hlift . filter
+      htake n = hlift (take n)
+      htakeWhile f = hlift (takeWhile f)
+      hdrop n = hlift (drop n)
+      hdropWhile f = hlift (dropWhile f)
+
+instance FuncTools Matrix where
+      hflat = undefined
+      hlift f = matrix . map f . matForm
+      hmap = hlift . map
+      hfilter = hlift . filter
+      htake n = hlift (take n)
+      htakeWhile f = hlift (takeWhile f)
+      hdrop n = hlift (drop n)
+      hdropWhile f = hlift (dropWhile f)
 
 ---------------------------------------------------
 -- Type Conversion
