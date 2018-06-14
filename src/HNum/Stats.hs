@@ -9,8 +9,6 @@ Stability   : Experimental
 module HNum.Stats where
 
 import           HNum.Vector
-import           Data.Random.Normal
-import           System.Random
 import           HNum.CSV
 
 -- | To contain coefficients of linear regression.
