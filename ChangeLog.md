@@ -4,6 +4,7 @@
 ## 0.5.0.0
 
 * Great Optimisation with parallel
+* Fix infinite determinant by Rosetta stone
 
 ## 0.4.0.0
 

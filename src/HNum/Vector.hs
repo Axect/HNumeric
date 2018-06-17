@@ -502,7 +502,7 @@ detMat m
   | l == 2
   = detMat m11 * detMat m22 - detMat m12 * detMat m21
   | d00 == 0
-  = (-1) ^ (l - 1) * detMat (cycleMat m)
+  = determinant m
   | otherwise
   = m11
     `par`  m12
@@ -575,3 +575,34 @@ fd :: Eq a => a -> [a] -> Int
 fd n v | n `notElem` v = error "Not element!"
        | otherwise     = snd $ head $ dropWhile (\x -> fst x /= n) idx
   where idx = zip v [0 ..]
+
+
+-------------------------------------------------------------
+-- Rosetta Stone
+-------------------------------------------------------------
+sPermutations :: [a] -> [([a], Int)]
+sPermutations = flip zip (cycle [1, -1]) . foldl aux [[]]
+ where
+  aux items x = do
+    (f, item) <- zip (cycle [reverse, id]) items
+    f (insertEv x item)
+  insertEv x []         = [[x]]
+  insertEv x l@(y : ys) = (x : l) : ((y :) <$>) (insertEv x ys)
+
+elemPos :: [[a]] -> Int -> Int -> a
+elemPos ms i j = (ms !! i) !! j
+
+prod :: Num a => ([[a]] -> Int -> Int -> a) -> [[a]] -> [Int] -> a
+prod f ms = product . zipWith (f ms) [0 ..]
+
+sDeterminant
+  :: Num a => ([[a]] -> Int -> Int -> a) -> [[a]] -> [([Int], Int)] -> a
+sDeterminant f ms = sum . fmap (\(is, s) -> fromIntegral s * prod f ms is)
+
+determinant :: Num a => [[a]] -> a
+determinant ms =
+  sDeterminant elemPos ms . sPermutations $ [0 .. pred . length $ ms]
+
+permanent :: Num a => [[a]] -> a
+permanent ms =
+  sum . fmap (prod elemPos ms . fst) . sPermutations $ [0 .. pred . length $ ms]
