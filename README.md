@@ -4,10 +4,11 @@
 
 ## Packages
 
-* HNum.Vector : Contain vector, matrix, linear algebra
-* HNum.Stats  : Contain statistical functions
-* HNum.CSV    : CSV Tools for HNum (Contain DataFrame)
-* HNum.F      : Functional Programming Tools for HNum
+* HNum.Vector  : Contain vector, matrix, linear algebra
+* HNum.Stats   : Contain statistical functions
+* HNum.CSV     : CSV Tools for HNum (Contain DataFrame)
+* HNum.Special : Special Function wrapper for HNum
+* HNum.F       : Functional Programming Tools for HNum
 
 ## Installation
 
@@ -174,8 +175,9 @@ rse v w
 * Divide and Conquer Matrix Multiplication, Determinant, Inverse
 * Module CSV with DataFrame (read / write)
 * FuncTools
+* Parallelize Matrix Arithmetics
 
-### TODO (2018.06.13)
+### TODO (2018.06.18)
 
 * DSL Documentation by LaTeX (Developing)
-* More Statistical Tools
+* More Statistical Tools (Like Normal Distribution)
