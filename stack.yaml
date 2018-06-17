@@ -42,6 +42,7 @@ extra-deps:
   - normaldistribution-1.1.0.3
   - random-1.1
   - math-functions-0.2.1.0
+  - parallel-3.2.1.1
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

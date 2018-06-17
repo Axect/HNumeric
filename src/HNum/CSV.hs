@@ -9,6 +9,8 @@ Stability   : Experimental
 module HNum.CSV where
 
 import           HNum.Vector
+import           Data.List                      ( intercalate )
+import           Control.Parallel
 
 -----------------------------------------------
 -- Declaration
@@ -58,19 +60,22 @@ class Functor f => Writable f where
   writeCSV :: Show a => String -> f a -> IO ()
 
 instance Writable Vector where
-  toString v = foldr (\x y -> x ++ "\n" ++ y) "" (show <$> v)
+  toString v = intercalate "\n" (toList $ show <$> v)
   writeCSV title v = writeFile title (toString v)
 
 instance Writable Matrix where
-  toString m = foldr ((\x y -> x ++ "\n" ++ y) . cm) "" m1
+  toString m = m1 `seq` m2 `seq` intercalate "\n" m2
     where m1 = matForm (show <$> m)
+          m2 = map (intercalate ",") m1
   writeCSV title m = writeFile title (toString m)
 
 instance Writable DataFrame where
-  toString (DataFrame h m) = h' ++ "\n" ++ m'
-    where h' = cm h
-          m' = toString (transpose m)
-  writeCSV title df = writeFile title (toString df)
+  toString (DataFrame h m) = h' `par` t' `pseq` m' `pseq` h' ++ "\n" ++ m'
+    where h' = intercalate "," h
+          t' = transpose m
+          m' = toString t'
+  writeCSV title df = df' `seq` writeFile title df'
+    where df' = toString df
 
 -----------------------------------------------
 -- Read from CSV
@@ -87,17 +92,12 @@ readCSV filepath = do
 -----------------------------------------------
 -- Backend Function
 -----------------------------------------------
--- | For Convenient 
-cm :: [String] -> String
-cm [] = []
-cm (x : xs) | null xs   = x
-            | otherwise = x ++ "," ++ cm xs
-
 -- | Split With Seperator
 splitWith :: Char -> String -> [String]
 splitWith _ [] = []
-splitWith sep str | null temp'' = [temp]
-                  | otherwise   = temp : splitWith sep temp'
+splitWith sep str
+  | null temp'' = [temp]
+  | otherwise = temp `par` temp'' `pseq` temp' `pseq` temp : splitWith sep temp'
  where
   temp   = takeWhile (/= sep) str
   temp'' = dropWhile (/= sep) str
@@ -106,8 +106,9 @@ splitWith sep str | null temp'' = [temp]
 -- | Remove Quotation Symbol
 rmQuot :: String -> String
 rmQuot [] = []
-rmQuot x | null temp = clean
-         | otherwise = clean ++ rmQuot clean'
+rmQuot x
+  | null temp = clean
+  | otherwise = clean `par` temp `pseq` clean' `pseq` clean ++ rmQuot clean'
  where
   clean  = takeWhile (/= '"') x
   temp   = dropWhile (/= '"') x

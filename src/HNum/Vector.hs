@@ -11,6 +11,7 @@ module HNum.Vector where
 import           Data.Functor                   ( )
 import           Control.Applicative            ( )
 import           HNum.F
+import           Control.Parallel
 
 ---------------------------------------------------
 -- Vector
@@ -77,14 +78,14 @@ class List m where
   -- | From List
   fromList :: [a] -> m a
   -- | Extract Element
-  (!) :: m a -> Int -> a
+  (.!) :: m a -> Int -> a
   -- | Find Position of Element
   findFirst :: Eq a => a -> m a -> Int
 
 instance List Vector where
   toList (Vector xs) = xs
   fromList = Vector
-  v ! n = toList v !! n
+  v .! n = toList v !! n
   findFirst n v | n `notElem` v = error "Not element!"
                 | otherwise     = snd $ head $ dropWhile (\x -> fst x /= n) idx
     where idx = zip (toList v) [0..]
@@ -116,26 +117,30 @@ instance Matrices Matrix where
     | r*c /= length v = error "Matrix Dimension mismatch!"
     | b = ctake c v
     | otherwise = dtake c v
-      where ctake :: Int -> [a] -> [[a]]
-            ctake _ [] = []
-            ctake n m = take n m : ctake n (drop n m)
-            dtake :: Int -> [a] -> [[a]]
-            dtake _ [] = []
-            dtake n m = [ptake n m r | r <- [0..(length m `div` n - 1)]]
-            ptake n v r = [v !! x | x <- idx v, x `mod` (length v `div` n) == r]
-            idx v = take (length v) [0..]
+    where ctake _ [] = []
+          ctake n m = let tnm = take n m
+                          dnm = drop n m in tnm `par` dnm `pseq` tnm : ctake n dnm
+          dtake _ [] = []
+          dtake n m = [ptake n m r | r <- [0..(length m `div` n - 1)]]
+          ptake n v r = let idxv = idx v in idxv `seq` [v !! x | x <- idxv, x `mod` (length v `div` n) == r]
+          idx v = take (length v) [0..]
   formMat [] = Matrix (Vector []) 0 0 True
-  formMat xs = Matrix (Vector (concat xs)) (length xs) (length (head xs)) True
+  formMat xs = cxs `par` lxs `pseq` Matrix (Vector cxs) lxs (length (head xs)) True
+    where cxs = concat xs
+          lxs = length xs
 
 instance Show a => Show (Matrix a) where
   show m = "Matrix " ++ show (matForm m)
 
 instance Functor Matrix where
-  fmap f mat = mat { val = fmap f (val mat) }
+  fmap f mat = vm `seq` mat { val = fmap f vm }
+    where vm = val mat
 
 instance Applicative Matrix where
   pure a = matrix []
-  mf <*> mx = mx { val = val mf <*> val mx }
+  mf <*> mx = vmf `par` vmx `pseq` mx { val = vmf <*> vmx }
+    where vmf = val mf
+          vmx = val mx
 
 instance Num a => Num (Matrix a) where
   negate m = negate <$> m
@@ -268,17 +273,28 @@ instance VecOps Matrix where
 
 instance MatOps Matrix where
   m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
-          | otherwise      = matrix $ matForm m %-*-% matForm n
-  m %/% n = m %*% inv n
+          | otherwise      = mfm `par` mfn `pseq` matrix $ mfm %-*-% mfn
+          where mfm = matForm m
+                mfn = matForm n
+  m %/% n = invn `seq` m %*% invn
+    where invn = inv n
   det m | col m /= row m = error "Can't calculate determinant of non-square matrix"
         | otherwise = detMat (matForm m)
   inv m | col m /= row m = error "Can't calculate inverse of non-square matrix"
-        | otherwise = (matrix . invMat . matForm) m
-  transpose m = m {row = col m, col = row m, byRow = not (byRow m)}
+        | otherwise = mfm `seq` invM `seq` matrix invM
+        where mfm = matForm m
+              invM = invMat mfm
+  transpose m = cm `par` rm `par` bm `pseq` m {row = col m, col = row m, byRow = not (byRow m)}
+    where cm = col m
+          rm = row m
+          bm = byRow m
 
 -- |Block Partitioning
 bp :: Int -> Matrix a -> Matrix a
-bp n m = matrix $ bpMat n (matForm m)
+bp n m = mfm `seq` bpm `seq` matrix bpm
+ where
+  mfm = matForm m
+  bpm = bpMat n mfm
 
 ---------------------------------------------------
 -- Concatenate
@@ -288,35 +304,48 @@ class Functor f => Concatable f where
   vcat :: f a -> f a -> Matrix a
 
 instance Concatable Vector where
-  hcat v w = fromList (toList v ++ toList w)
-  vcat v w = matrix (toList v : [toList w])
+  hcat v w = tlv `par` tlw `pseq` fromList (tlv ++ tlw)
+    where tlv = toList v
+          tlw = toList w
+  vcat v w = tlv `par` tlw `pseq` matrix tlm
+    where tlv = toList v
+          tlw = [toList w]
+          tlm = tlv : tlw
 
 instance Concatable Matrix where
-  hcat m n | row m == row n = matrix (zipWith (++) mf nf)
+  hcat m n | row m == row n = mf `par` nf `pseq` matrix (zipWith (++) mf nf)
            | otherwise = error "Can't concatenate matrices horizontally which have different row"
            where mf = matForm m
                  nf = matForm n
-  vcat m n | col m == col n = m {val = hcat (val m) (val n), row = row m + row n}
+  vcat m n | col m == col n = vm `par` vn `pseq` hmn `par` rm `par` rn `pseq` m {val = hmn, row = rm + rn}
            | otherwise = error "Can't concatenate matrices vertically which have different col"
+           where vm = val m
+                 vn = val n
+                 hmn = hcat vm vn
+                 rm = row m
+                 rn = row n
 
 -- |(.:) inserts vector to head of matrix.
 (.:) :: Vector a -> Matrix a -> Matrix a
-v .: m | length v == col m = matrix (toList v : matForm m)
+v .: m | length v == col m = tv `par` mfm `pseq` matrix (tv : mfm)
        | otherwise         = error "Can't insert length(Vector) /= col(Matrix)"
+ where
+  tv  = toList v
+  mfm = matForm m
 
 ---------------------------------------------------
 -- Sort
 ---------------------------------------------------
 -- | Quick Sort
 qsort :: Ord a => Vector a -> Vector a
-qsort (Vector []) = vec []
-qsort (Vector (x : xs)) =
-  (qsort . vec) [ y | y <- xs, y <= x ] `hcat` vec [x] `hcat` (qsort . vec)
-    [ y | y <- xs, y > x ]
-
--- | Merge Sort
---msort :: Ord a => Vector a -> Vector a
---msort 
+qsort (Vector []      ) = vec []
+qsort (Vector (x : xs)) = qsv1 `par` qsv2 `par` vx `pseq` hv1 `pseq` hv2
+ where
+  qsv1 = (qsort . vec) [ y | y <- xs, y <= x ]
+  qsv2 = (qsort . vec) [ y | y <- xs, y > x ]
+  vx   = vec [x]
+  hv1  = hcat qsv1 vx
+  hv2  = hcat hv1 qsv2
 
 ---------------------------------------------------
 -- Backend Functions (Do not Understand)
@@ -385,7 +414,23 @@ _     %-*-% []    = []
 _     %-*-% [[]]  = [[]]
 [[] ] %-*-% _     = [[]]
 [[x]] %-*-% [[y]] = [[x * y]]
-m     %-*-% n     = zipWith (++) a11 a12 ++ zipWith (++) a21 a22
+m %-*-% n =
+  m11
+    `par`  m12
+    `par`  m21
+    `par`  m22
+    `par`  n11
+    `par`  n12
+    `par`  n21
+    `par`  n22
+    `pseq` a11
+    `par`  a12
+    `par`  a21
+    `par`  a22
+    `pseq` b1
+    `par`  b2
+    `pseq` b1
+    ++     b2
  where
   (m11, n11) = (bpMat 1 m, bpMat 1 n)
   (m12, n12) = (bpMat 2 m, bpMat 2 n)
@@ -395,6 +440,8 @@ m     %-*-% n     = zipWith (++) a11 a12 ++ zipWith (++) a21 a22
   a12        = (m11 %-*-% n12) %-+-% (m12 %-*-% n22)
   a21        = (m21 %-*-% n11) %-+-% (m22 %-*-% n21)
   a22        = (m21 %-*-% n12) %-+-% (m22 %-*-% n22)
+  b1         = zipWith (++) a11 a12
+  b2         = zipWith (++) a21 a22
 
 zerosVec :: Int -> [Int]
 zerosVec n = take n [0, 0 ..]
@@ -404,7 +451,10 @@ eyeMat n = [ basisVec x n | x <- [0 .. (n - 1)] ]
 
 -- Position -> Length 
 basisVec :: Int -> Int -> [Int]
-basisVec n m = zerosVec n ++ [1] ++ zerosVec (m - n - 1)
+basisVec n m = zvn `par` zvm `pseq` zvn ++ [1] ++ zvm
+ where
+  zvn = zerosVec n
+  zvm = zerosVec (m - n - 1)
 
 permMat :: Int -> Int -> [[a]] -> [[Int]]
 permMat i j m
@@ -449,9 +499,23 @@ bpMat' n m | n == 1 = (map (take l) . take l) m
 detMat :: (Eq a, Fractional a) => [[a]] -> a
 detMat [[x]] = x
 detMat m
-  | l == 2    = detMat m11 * detMat m22 - detMat m12 * detMat m21
-  | d00 == 0  = (-1) ^ (l - 1) * detMat (cycleMat m)
-  | otherwise = (detMat m11 * detMat m22 - detMat m12 * detMat m21) / detMat m00
+  | l == 2
+  = detMat m11 * detMat m22 - detMat m12 * detMat m21
+  | d00 == 0
+  = (-1) ^ (l - 1) * detMat (cycleMat m)
+  | otherwise
+  = m11
+    `par`  m12
+    `par`  m21
+    `par`  m22
+    `par`  m00
+    `pseq` d00
+    `par`  d11
+    `par`  d12
+    `par`  d21
+    `par`  d22
+    `pseq` (d11 * d22 - d12 * d21)
+    /      d00
  where
   l   = length m
   m11 = bpMat' 1 m
@@ -460,6 +524,10 @@ detMat m
   m22 = bpMat' 4 m
   m00 = bpMat' 0 m
   d00 = detMat m00
+  d11 = detMat m11
+  d22 = detMat m22
+  d12 = detMat m12
+  d21 = detMat m21
 
 -- | Inverse for Double List - Order ~ n * 2^n
 invMat :: (Eq a, Fractional a) => [[a]] -> [[a]]
@@ -472,7 +540,21 @@ invMat m
     $  zipWith (++) m22          (negMap m12)
     ++ zipWith (++) (negMap m21) m11
   | otherwise
-  = zipWith (++) a11 a12 ++ zipWith (++) a21 a22
+  = m11
+    `par`  m12
+    `par`  m21
+    `par`  m22
+    `pseq` a00
+    `pseq` s
+    `pseq` s00
+    `pseq` a11
+    `par`  a12
+    `par`  a21
+    `par`  a22
+    `pseq` b1
+    `par`  b2
+    `pseq` b1
+    ++     b2
  where
   m11 = bpMat 1 m
   m12 = bpMat 2 m
@@ -485,6 +567,8 @@ invMat m
   a12 = negMap a00 %-*-% m12 %-*-% s00
   a21 = negMap s00 %-*-% m21 %-*-% a00
   a22 = s00
+  b1  = zipWith (++) a11 a12
+  b2  = zipWith (++) a21 a22
 
 -- | Find First 
 fd :: Eq a => a -> [a] -> Int
