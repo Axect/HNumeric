@@ -11,6 +11,9 @@ module HNum.CSV where
 import           HNum.Vector
 import           Data.List                      ( intercalate )
 import           Control.Parallel
+import           Control.Concurrent.ParallelIO
+import qualified Control.Concurrent.ParallelIO.Local
+                                               as Local
 
 -----------------------------------------------
 -- Declaration
@@ -20,7 +23,7 @@ type Header = [String]
 
 -- | DataFrame structure to write csv
 data DataFrame a = DataFrame { header :: Header
-                             , dat :: Matrix a
+                             , dat :: Matrix a -- ^ Row Based
                              } deriving (Show, Eq)
 
 -- | dataframe constructor
@@ -36,10 +39,10 @@ fromVectors h vs = dataframe h (matrix vs') where vs' = map toList vs
 -- | Extract Vector in DataFrame
 (#) :: Eq a => DataFrame a -> String -> Vector a
 df # hd | hd `notElem` header df = error "No specific header in dataFrame"
-        | otherwise              = vec $ bd !! i
+        | otherwise              = i `par` bd `pseq` vec $ bd !! i
  where
   i  = hd `fd` header df
-  bd = matForm $ transpose $ dat df
+  bd = matForm $ dat df
 
 instance Functor DataFrame where
   fmap f df = df { dat = fmap f (dat df) }
@@ -57,7 +60,7 @@ class Functor f => Writable f where
   -- | Object to String (Different to Show)
   toString :: Show a => f a -> String
   -- | Write as CSV
-  writeCSV :: Show a => String -> f a -> IO ()
+  writeCSV :: (Eq a, Show a) => String -> f a -> IO ()
 
 instance Writable Vector where
   toString v = intercalate "\n" (toList $ show <$> v)
@@ -70,12 +73,22 @@ instance Writable Matrix where
   writeCSV title m = writeFile title (toString m)
 
 instance Writable DataFrame where
-  toString (DataFrame h m) = h' `par` t' `pseq` m' `pseq` h' ++ "\n" ++ m'
-    where h' = intercalate "," h
-          t' = transpose m
-          m' = toString t'
-  writeCSV title df = df' `seq` writeFile title df'
-    where df' = toString df
+  toString = undefined
+  writeCSV parentPath df =
+    let childPath = header df
+        vecValue = [df # heads | heads <- childPath]
+        strValue = [toString vecs | vecs <- vecValue]
+        candidate = [heads ++ "\n" ++ strs | heads <- childPath, strs <- strValue]
+        commands = [writeFile (parentPath ++ "/" ++ heads ++ ".csv") cds | heads <- childPath, cds <- candidate]
+    in childPath
+        `pseq` vecValue
+        `pseq` strValue
+        `pseq` candidate
+        `pseq` commands
+        `pseq` do
+          Local.withPool 4 $ \pool -> Local.parallel_ pool commands
+
+
 
 -----------------------------------------------
 -- Read from CSV

@@ -43,6 +43,7 @@ extra-deps:
   - random-1.1
   - math-functions-0.2.1.0
   - parallel-3.2.1.1
+  - parallel-io-0.3.3
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
