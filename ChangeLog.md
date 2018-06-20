@@ -1,5 +1,9 @@
 # Changelog for HNumeric
 
+## 0.5.0.2
+
+* Vector Parallel -> Vector Single Thread
+* Stats Single    -> Stats Parallel
 
 ## 0.5.0.0
 

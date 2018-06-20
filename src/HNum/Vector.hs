@@ -119,13 +119,13 @@ instance Matrices Matrix where
     | otherwise = dtake c v
     where ctake _ [] = []
           ctake n m = let tnm = take n m
-                          dnm = drop n m in tnm `par` dnm `pseq` tnm : ctake n dnm
+                          dnm = drop n m in tnm `seq` dnm `seq` tnm : ctake n dnm
           dtake _ [] = []
           dtake n m = [ptake n m r | r <- [0..(length m `div` n - 1)]]
           ptake n v r = let idxv = idx v in idxv `seq` [v !! x | x <- idxv, x `mod` (length v `div` n) == r]
           idx v = take (length v) [0..]
   formMat [] = Matrix (Vector []) 0 0 True
-  formMat xs = cxs `par` lxs `pseq` Matrix (Vector cxs) lxs (length (head xs)) True
+  formMat xs = cxs `seq` lxs `seq` Matrix (Vector cxs) lxs (length (head xs)) True
     where cxs = concat xs
           lxs = length xs
 
@@ -138,7 +138,7 @@ instance Functor Matrix where
 
 instance Applicative Matrix where
   pure a = matrix []
-  mf <*> mx = vmf `par` vmx `pseq` mx { val = vmf <*> vmx }
+  mf <*> mx = vmf `seq` vmx `seq` mx { val = vmf <*> vmx }
     where vmf = val mf
           vmx = val mx
 
@@ -273,7 +273,7 @@ instance VecOps Matrix where
 
 instance MatOps Matrix where
   m %*% n | col m /= row n = error "Can't Multiply - Dimension mismatch!"
-          | otherwise      = mfm `par` mfn `pseq` matrix $ mfm %-*-% mfn
+          | otherwise      = mfm `seq` mfn `seq` matrix $ mfm %-*-% mfn
           where mfm = matForm m
                 mfn = matForm n
   m %/% n = invn `seq` m %*% invn
@@ -284,7 +284,7 @@ instance MatOps Matrix where
         | otherwise = mfm `seq` invM `seq` matrix invM
         where mfm = matForm m
               invM = invMat mfm
-  transpose m = cm `par` rm `par` bm `pseq` m {row = col m, col = row m, byRow = not (byRow m)}
+  transpose m = cm `seq` rm `seq` bm `seq` m {row = col m, col = row m, byRow = not (byRow m)}
     where cm = col m
           rm = row m
           bm = byRow m
@@ -304,20 +304,20 @@ class Functor f => Concatable f where
   vcat :: f a -> f a -> Matrix a
 
 instance Concatable Vector where
-  hcat v w = tlv `par` tlw `pseq` fromList (tlv ++ tlw)
+  hcat v w = tlv `seq` tlw `seq` fromList (tlv ++ tlw)
     where tlv = toList v
           tlw = toList w
-  vcat v w = tlv `par` tlw `pseq` matrix tlm
+  vcat v w = tlv `seq` tlw `seq` matrix tlm
     where tlv = toList v
           tlw = [toList w]
           tlm = tlv : tlw
 
 instance Concatable Matrix where
-  hcat m n | row m == row n = mf `par` nf `pseq` matrix (zipWith (++) mf nf)
+  hcat m n | row m == row n = mf `seq` nf `seq` matrix (zipWith (++) mf nf)
            | otherwise = error "Can't concatenate matrices horizontally which have different row"
            where mf = matForm m
                  nf = matForm n
-  vcat m n | col m == col n = vm `par` vn `pseq` hmn `par` rm `par` rn `pseq` m {val = hmn, row = rm + rn}
+  vcat m n | col m == col n = vm `seq` vn `seq` hmn `seq` rm `seq` rn `seq` m {val = hmn, row = rm + rn}
            | otherwise = error "Can't concatenate matrices vertically which have different col"
            where vm = val m
                  vn = val n
@@ -327,7 +327,7 @@ instance Concatable Matrix where
 
 -- |(.:) inserts vector to head of matrix.
 (.:) :: Vector a -> Matrix a -> Matrix a
-v .: m | length v == col m = tv `par` mfm `pseq` matrix (tv : mfm)
+v .: m | length v == col m = tv `seq` mfm `seq` matrix (tv : mfm)
        | otherwise         = error "Can't insert length(Vector) /= col(Matrix)"
  where
   tv  = toList v
@@ -339,7 +339,7 @@ v .: m | length v == col m = tv `par` mfm `pseq` matrix (tv : mfm)
 -- | Quick Sort
 qsort :: Ord a => Vector a -> Vector a
 qsort (Vector []      ) = vec []
-qsort (Vector (x : xs)) = qsv1 `par` qsv2 `par` vx `pseq` hv1 `pseq` hv2
+qsort (Vector (x : xs)) = qsv1 `seq` qsv2 `seq` vx `seq` hv1 `seq` hv2
  where
   qsv1 = (qsort . vec) [ y | y <- xs, y <= x ]
   qsv2 = (qsort . vec) [ y | y <- xs, y > x ]
@@ -416,21 +416,21 @@ _     %-*-% [[]]  = [[]]
 [[x]] %-*-% [[y]] = [[x * y]]
 m %-*-% n =
   m11
-    `par`  m12
-    `par`  m21
-    `par`  m22
-    `par`  n11
-    `par`  n12
-    `par`  n21
-    `par`  n22
-    `pseq` a11
-    `par`  a12
-    `par`  a21
-    `par`  a22
-    `pseq` b1
-    `par`  b2
-    `pseq` b1
-    ++     b2
+    `seq` m12
+    `seq` m21
+    `seq` m22
+    `seq` n11
+    `seq` n12
+    `seq` n21
+    `seq` n22
+    `seq` a11
+    `seq` a12
+    `seq` a21
+    `seq` a22
+    `seq` b1
+    `seq` b2
+    `seq` b1
+    ++    b2
  where
   (m11, n11) = (bpMat 1 m, bpMat 1 n)
   (m12, n12) = (bpMat 2 m, bpMat 2 n)
@@ -451,7 +451,7 @@ eyeMat n = [ basisVec x n | x <- [0 .. (n - 1)] ]
 
 -- Position -> Length 
 basisVec :: Int -> Int -> [Int]
-basisVec n m = zvn `par` zvm `pseq` zvn ++ [1] ++ zvm
+basisVec n m = zvn `seq` zvm `seq` zvn ++ [1] ++ zvm
  where
   zvn = zerosVec n
   zvm = zerosVec (m - n - 1)
@@ -505,17 +505,17 @@ detMat m
   = determinant m
   | otherwise
   = m11
-    `par`  m12
-    `par`  m21
-    `par`  m22
-    `par`  m00
-    `pseq` d00
-    `par`  d11
-    `par`  d12
-    `par`  d21
-    `par`  d22
-    `pseq` (d11 * d22 - d12 * d21)
-    /      d00
+    `seq` m12
+    `seq` m21
+    `seq` m22
+    `seq` m00
+    `seq` d00
+    `seq` d11
+    `seq` d12
+    `seq` d21
+    `seq` d22
+    `seq` (d11 * d22 - d12 * d21)
+    /     d00
  where
   l   = length m
   m11 = bpMat' 1 m
@@ -541,20 +541,20 @@ invMat m
     ++ zipWith (++) (negMap m21) m11
   | otherwise
   = m11
-    `par`  m12
-    `par`  m21
-    `par`  m22
-    `pseq` a00
-    `pseq` s
-    `pseq` s00
-    `pseq` a11
-    `par`  a12
-    `par`  a21
-    `par`  a22
-    `pseq` b1
-    `par`  b2
-    `pseq` b1
-    ++     b2
+    `seq` m12
+    `seq` m21
+    `seq` m22
+    `seq` a00
+    `seq` s
+    `seq` s00
+    `seq` a11
+    `seq` a12
+    `seq` a21
+    `seq` a22
+    `seq` b1
+    `seq` b2
+    `seq` b1
+    ++    b2
  where
   m11 = bpMat 1 m
   m12 = bpMat 2 m

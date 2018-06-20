@@ -10,6 +10,8 @@ module HNum.Stats where
 
 import           HNum.Vector
 import           HNum.CSV
+import           Data.List
+import           Control.Parallel
 
 -- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
@@ -70,14 +72,33 @@ class VecOps v => Statistical v where
 
 instance Statistical Vector where
   -- mean
-  mean x = sum x / fromIntegral (length x)
+  mean xs = s / fromIntegral l
+    where
+      (s,l) = foldl' step (0,0) xs
+      step (s,l) a = let s' = s + a
+                         l' = l + 1
+                      in s' `seq` l' `seq` (s', l')
   -- cov'
   cov' x y
     | length x <= 1 || length y <= 1 = error "Samples are not enough"
     | length x /= length y = error "Length is not same"
-    | otherwise = ((x .- mean x) .*. (y .- mean y)) / fromIntegral (length x - 1)
+    | otherwise = let mx = mean x
+                      my = mean y
+                      l = length x - 1
+                      xmx = x .- mx
+                      ymy = y .- my
+                      xy = xmx .*. ymy
+                   in l
+                      `par` mx
+                      `par` my
+                      `pseq` xmx
+                      `par` ymy
+                      `pseq` xy / fromIntegral l
   -- cov
-  cov x y = matrix [[var x, cov' x y], [cov' y x, var y]]
+  cov x y = let vx = var x
+                vy = var y
+                vxy = cov' x y
+             in vx `par` vy `par` vxy `pseq` matrix [[vx, vxy], [vxy, vy]]
   -- var
   var v = cov' v v
   -- std
