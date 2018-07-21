@@ -12,6 +12,7 @@ import           HNum.Vector
 import           HNum.CSV
 import           Data.List
 import           Control.Parallel
+import           System.Random
 
 -- | To contain coefficients of linear regression.
 type Coeff a = (a, a)
@@ -200,6 +201,12 @@ sma p v = vec $ take (p - 1) v' ++ sma' p v'
     = []
     | otherwise
     = let m = sum (take p x) / fromIntegral p in m : sma' p (tail x)
+
+--------------------------------------------------------
+-- For Machine Learning
+--------------------------------------------------------
+
+-- | Generate Random Matrix
 
 
 --------------------------------------------------------

@@ -184,24 +184,24 @@ instance Foldable Matrix where
 -- FuncTools
 ---------------------------------------------------
 instance FuncTools Vector where
-      hflat f = f . toList
-      hlift f = vec . f . toList
-      hmap = hlift . map
-      hfilter = hlift . filter
-      htake n = hlift (take n)
-      htakeWhile f = hlift (takeWhile f)
-      hdrop n = hlift (drop n)
-      hdropWhile f = hlift (dropWhile f)
+  hflat f = f . toList
+  hlift f = vec . f . toList
+  hmap = hlift . map
+  hfilter = hlift . filter
+  htake n = hlift (take n)
+  htakeWhile f = hlift (takeWhile f)
+  hdrop n = hlift (drop n)
+  hdropWhile f = hlift (dropWhile f)
 
 instance FuncTools Matrix where
-      hflat = undefined
-      hlift f = matrix . map f . matForm
-      hmap = hlift . map
-      hfilter = hlift . filter
-      htake n = hlift (take n)
-      htakeWhile f = hlift (takeWhile f)
-      hdrop n = hlift (drop n)
-      hdropWhile f = hlift (dropWhile f)
+  hflat = undefined
+  hlift f = matrix . map f . matForm
+  hmap = hlift . map
+  hfilter = hlift . filter
+  htake n = hlift (take n)
+  htakeWhile f = hlift (takeWhile f)
+  hdrop n = hlift (drop n)
+  hdropWhile f = hlift (dropWhile f)
 
 ---------------------------------------------------
 -- Type Conversion
